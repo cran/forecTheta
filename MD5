@@ -1,0 +1,9 @@
+9c999dd62ae3a231457e61133dd51786 *DESCRIPTION
+1231284227d6d9e0d189de5ff0db67d6 *NAMESPACE
+0b7304a519b6c8ac8b0b6658e4f2fc36 *R/crossValidationFunctions.R
+ae17a60295ea4666f1e6b320e731c93f *R/errorMetricFunctions.R
+1681cf11390e909759f123cb8fa45339 *R/forecastFunctions.R
+4893c3c293ccfb31428c829bc0e5dfff *man/crossValidationFunctions.Rd
+8ba914c260ff44f509b06876a330f9cb *man/errorMetricFunctions.Rd
+3ac9482fee7b48fc4a0e3a72d44fd04c *man/forecTheta-package.Rd
+031429d37fa7a10190fbb0dbaeeb20a7 *man/forecastFunctions.Rd

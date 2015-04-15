@@ -1,0 +1,15 @@
+Package: forecTheta
+Type: Package
+Title: Forecasting Time Series by Theta Method
+Version: 1.0
+Date: 2015-03-30
+Author: Jose Augusto Fioruci, Francisco Louzada and Bao Yiqi
+Maintainer: Jose Augusto Fioruci <jafioruci@gmail.com>
+Depends: R (>= 3.0.2), forecast, parallel
+Description: Routines for forecasting univariate time series using Theta Method and Optimised Theta Method (Fioruci et al, 2015). Contains two cross-validation routines of Tashman (2000). 
+License: GPL (>= 2)
+URL: http://arxiv.org/abs/1503.03529
+Packaged: 2015-04-15 14:02:41 UTC; Augusto
+NeedsCompilation: no
+Repository: CRAN
+Date/Publication: 2015-04-15 21:41:01

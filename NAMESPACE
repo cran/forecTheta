@@ -1,0 +1,2 @@
+import(forecast, parallel)
+export(otm,thetaM,groe,fixOrig,rolOrig,errorMetric)
