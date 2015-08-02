@@ -17,8 +17,8 @@
 	\tabular{ll}{
 		Package: \tab forecTheta\cr
 		Type: \tab Package\cr
-		Version: \tab 1.0\cr
-		Date: \tab 2015-03-30\cr
+		Version: \tab 1.1\cr
+		Date: \tab 2015-07-31\cr
 		License: \tab GPL (>=2.0) \cr
 	}
 	

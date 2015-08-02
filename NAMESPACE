@@ -1,2 +1,3 @@
+importFrom("stats", "acf", "as.ts", "decompose", "end", "frequency", "is.ts", "lm", "median", "start", "time", "ts")
 import(forecast, parallel)
 export(otm,thetaM,groe,fixOrig,rolOrig,errorMetric)
