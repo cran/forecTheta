@@ -6,7 +6,9 @@ errorMetric <- function(obs, forec, type="sAPE", statistic="M"){
 		obs = as.numeric(obs)	
 		forec = as.numeric(forec)
 	}
-	if(length(obs)!=length(forec))  stop("Error in errorMetric function: the dimensions of the vectors are different.")
+	obs = as.matrix(obs)
+	forec = as.matrix(forec)
+	if(any(dim(obs)!=dim(forec)))  stop("Error in errorMetric function: the dimensions of the vectors are different.")
 	
 	if(type == "AE")
 		errors = abs(obs - forec) 	

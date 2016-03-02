@@ -1,5 +1,5 @@
 
-groe <- function(y, forecFunction=thetaM, g="sAPE", n1=length(y)-10, m=5, H=length(y)-n1, p=1+floor((length(y)-n1)/m), ...){	
+groe <- function(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, m=5, H=length(y)-n1, p=1+floor((length(y)-n1)/m), ...){	
 	if(n1>=length(y)){ stop("Error in groe function: n1>=length(y)") }
 	if(n1<4){ stop("Error in groe function: n1<4") }
 	if(m<1){ stop("Error in groe function: m<1") }
@@ -30,7 +30,7 @@ groe <- function(y, forecFunction=thetaM, g="sAPE", n1=length(y)-10, m=5, H=leng
 }
 
 
-fixOrig <- function(y, forecFunction=thetaM, g="sAPE", n1=length(y)-10, ...){
+fixOrig <- function(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, ...){
 	n = length(y)
 	m = n-n1
 	H = n-n1
@@ -39,7 +39,7 @@ fixOrig <- function(y, forecFunction=thetaM, g="sAPE", n1=length(y)-10, ...){
 }
 
 
-rolOrig <- function(y, forecFunction=thetaM, g="sAPE", n1=length(y)-10, ...){
+rolOrig <- function(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, ...){
 	n = length(y)
 	m = 1
 	H = n-n1

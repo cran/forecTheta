@@ -65,7 +65,7 @@
 	%% ~put references to the literature/web site here ~
 %%}
 \author{
-	Jose Augusto Fioruci and Francisco Louzada
+	Jose Augusto Fiorucci and Francisco Louzada
 	%%  ~~who you are~~
 }
 %%\note{
@@ -84,7 +84,7 @@ y1 = 2+ 0.15*(1:20) + rnorm(20,2)
 y2 = y1[20]+ 0.3*(1:30) + rnorm(30,2)
 y =  as.ts(c(y1,y2))
 
-otm.fit <- otm(y=as.ts(y[1:40]), h=10)
+otm.fit <- otm.arxiv(y=as.ts(y[1:40]), h=10)
 
 ### sMAPE metric
 errorMetric(obs=as.ts(y[41:50]), forec=otm.fit$mean)

@@ -1,3 +1,10 @@
+Version 2.0 (29 Feb 2016)
+   * included the models: dotm, dstm, otm, stm, stheta, expSmoot;
+   * included the class thetaModel;
+   * included S3 functions: plot.thetaModel, print.thetaModel,   	summary.thetaModel;
+   * the old otm() function was renamed to otm.arxiv();
+   * the thetaM() function was replaced by stheta() for equivalence with IJF paper.
+   
 Version 1.1 (31 Jul 2015)
    * NAMESPACE updated;
    * otm() updated;

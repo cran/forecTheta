@@ -12,12 +12,12 @@
 	%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-	groe(y, forecFunction=thetaM, g="sAPE", n1=length(y)-10, m=5, 
+	groe(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, m=5, 
 	        H=length(y)-n1, p=1+floor((length(y)-n1)/m), ...)
 	
-	rolOrig(y, forecFunction=thetaM, g="sAPE", n1=length(y)-10, ...)
+	rolOrig(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, ...)
 	
-	fixOrig(y, forecFunction=thetaM, g="sAPE", n1=length(y)-10, ...)
+	fixOrig(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, ...)
 }
 	%- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -76,7 +76,7 @@
 %% ~put references to the literature/web site here ~
 }
 \author{
-	Jose Augusto Fioruci and Francisco Louzada
+	Jose Augusto Fiorucci and Francisco Louzada
 	%%  ~~who you are~~
 }
 \note{
@@ -88,7 +88,7 @@
 	%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{otm}}, \code{\link[forecast]{ses}} 
+	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{dotm}},  
 	%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 
@@ -98,27 +98,23 @@ y2 = y1[20]+ 0.3*(1:30) + rnorm(30,2)
 y =  as.ts(c(y1,y2))
 
 ## Rolling Origin Evaluation
-rolOrig( y=y, forecFunction = ses, n1=40)
-rolOrig( y=y, forecFunction = thetaM, n1=40)
-rolOrig( y=y, forecFunction = otm, n1=40, theta=1)
-rolOrig( y=y, forecFunction = otm, n1=40, theta=2)
-rolOrig( y=y, forecFunction = otm, n1=40, theta=3)
+rolOrig( y=y, forecFunction = dotm, n1=40)
+rolOrig( y=y, forecFunction = expSmoot, n1=40)
+rolOrig( y=y, forecFunction = stheta, n1=40)
+rolOrig( y=y, forecFunction = otm.arxiv, n1=40, theta=3)
 
 ## Fixed Origin Evaluation
-fixOrig( y=y, forecFunction = ses, n1=40)
-fixOrig( y=y, forecFunction = thetaM, n1=40)
-fixOrig( y=y, forecFunction = otm, n1=40, theta=1)
-fixOrig( y=y, forecFunction = otm, n1=40, theta=2)
-fixOrig( y=y, forecFunction = otm, n1=40, theta=3)
+fixOrig( y=y, forecFunction = dotm, n1=40)
+fixOrig( y=y, forecFunction = expSmoot, n1=40)
+fixOrig( y=y, forecFunction = stheta, n1=40)
+fixOrig( y=y, forecFunction = otm.arxiv, n1=40, theta=3)
 
 ## Generalised Rolling Origin Evaluation with two origin updates.
 ## Where the first is the 40th element and second is the 45th element
-groe( y=y, forecFunction = ses, m=5, n1=40)
-groe( y=y, forecFunction = thetaM, m=5, n1=40)
-groe( y=y, forecFunction = otm, m=5, n1=40, theta=1)
-groe( y=y, forecFunction = otm, m=5, n1=40, theta=2)
-groe( y=y, forecFunction = otm, m=5, n1=40, theta=3)
-	
+groe( y=y, forecFunction = dotm, m=5, n1=40)
+groe( y=y, forecFunction = expSmoot, m=5, n1=40)
+groe( y=y, forecFunction = stheta, m=5, n1=40)
+groe( y=y, forecFunction = otm.arxiv, m=5, n1=40, theta=3)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

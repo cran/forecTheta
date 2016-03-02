@@ -1,3 +1,14 @@
-importFrom("stats", "acf", "as.ts", "decompose", "end", "frequency", "is.ts", "lm", "median", "start", "time", "ts")
-import(forecast, parallel)
-export(otm,thetaM,groe,fixOrig,rolOrig,errorMetric)
+importFrom("stats", "acf", "as.ts", "decompose", "end", "frequency", "is.ts", "lm", "median", "start", "time", "ts","lsfit", "optim", "quantile", "rnorm", "sd")
+
+importFrom("graphics", "legend", "plot", "points", "polygon")
+
+importFrom("parallel","mclapply")
+
+importFrom("forecast","snaive")
+ 
+export(dotm, dstm, otm, stm, expSmoot, otm.arxiv, stheta, plot.thetaModel, groe, fixOrig, rolOrig,  errorMetric)
+
+S3method(plot, thetaModel)
+S3method(print, thetaModel)
+S3method(summary, thetaModel)
+S3method(print, summ)
