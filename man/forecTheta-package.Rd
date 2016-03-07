@@ -1,4 +1,4 @@
-\name{forecTheta-package}
+\name{forecTheta-Package}
 \alias{forecTheta-package}
 \alias{forecTheta}
 \docType{package}
@@ -7,7 +7,7 @@
 	%%~~ package title ~~
 }
 \description{
-	In this package we implemented functions for forecast univariate time series using the several Theta Models (Fiorucci et al, 2015 and 2016) and 
+	In this package we implement functions for forecast univariate time series using the several Theta Models (Fiorucci et al, 2015 and 2016) and 
 	the Standard Theta Method of Assimakopoulos \& Nikolopoulos (2000). 
 	Moreover, it is including a function for compute the main errors metrics used in time series forecasting and a function for compute the 
 	Generalised Rolling Origin Evaluation, which contain as particular cases the Rolling Origin Evaluation and the Fixed Origin Evaluation of Tashman (2000).
@@ -17,8 +17,8 @@
 	\tabular{ll}{
 		Package: \tab forecTheta\cr
 		Type: \tab Package\cr
-		Version: \tab 2.0\cr
-		Date: \tab 2016-02-29\cr
+		Version: \tab 2.1\cr
+		Date: \tab 2016-03-07\cr
 		License: \tab GPL (>=2.0) \cr
 	}
 	
@@ -42,7 +42,7 @@
 	Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F., Koehler, A. (2016). \emph{Models for optimising the theta method and their relationship to state space models}, 
 	International Journal of Forecasting. Accepted Paper. \url{https://www.researchgate.net/publication/294420765_Models_for_optimising_the_theta_method_and_their_relationship_to_state_space_models}
 	
-	Fioruci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. Free available at \url{ http://arxiv.org/abs/1503.03529 }. 
+	Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. Free available at \url{ http://arxiv.org/abs/1503.03529 }. 
 	
 	Assimakopoulos, V. and Nikolopoulos k. (2000). \emph{The theta model: a decomposition approach to forecasting}. International Journal of Forecasting 16, 4, 521--530.
 
@@ -51,7 +51,7 @@
 }
 %%~~ Optionally other standard keywords, one per line, from file KEYWORDS in ~~
 %%~~ the R documentation directory ~~
-\keyword{ Optimised Theta Method, Theta Method, Rolling Origin Evaluation, Fixed Origin Evaluation, Time Series Forecasting, Error Metric,  Cross Validation  }
+\keyword{ Dynamic Optimised Theta Model, Theta Method, Rolling Origin Evaluation, Fixed Origin Evaluation, Time Series Forecasting, Error Metric,  Cross Validation  }
 \seealso{
 	\code{\link[forecTheta]{dotm}}, \code{\link[forecTheta]{stheta}}, \code{\link[forecTheta]{otm.arxiv}}, 
 	\code{\link[forecTheta]{groe}}, \code{\link[forecTheta]{rolOrig}}, \code{\link[forecTheta]{fixOrig}},

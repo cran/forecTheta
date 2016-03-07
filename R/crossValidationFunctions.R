@@ -1,5 +1,5 @@
 
-groe <- function(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, m=5, H=length(y)-n1, p=1+floor((length(y)-n1)/m), ...){	
+groe <- function(y, forecFunction, g="sAPE", n1=length(y)-10, m=5, H=length(y)-n1, p=1+floor((length(y)-n1)/m), ...){	
 	if(n1>=length(y)){ stop("Error in groe function: n1>=length(y)") }
 	if(n1<4){ stop("Error in groe function: n1<4") }
 	if(m<1){ stop("Error in groe function: m<1") }

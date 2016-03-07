@@ -1,4 +1,4 @@
-\name{crossValidation}
+\name{Cross Validation}
 \alias{groe}
 \alias{fixOrig}
 \alias{rolOrig}
@@ -12,12 +12,12 @@
 	%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-	groe(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, m=5, 
+	groe(y, forecFunction, g="sAPE", n1=length(y)-10, m=5, 
 	        H=length(y)-n1, p=1+floor((length(y)-n1)/m), ...)
 	
-	rolOrig(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, ...)
+	rolOrig(y, forecFunction, g="sAPE", n1=length(y)-10, ...)
 	
-	fixOrig(y, forecFunction=stheta, g="sAPE", n1=length(y)-10, ...)
+	fixOrig(y, forecFunction, g="sAPE", n1=length(y)-10, ...)
 }
 	%- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,7 +27,6 @@
 	}
 	\item{forecFunction}{
 	A forecasting method as one object of the \code{forecast} class of forecast package. 
-	Default is the function \code{thetaM}, which implements the Theta-method.
 	%%     ~~Describe \code{forecFunction} here~~
 	}
 	\item{g}{
@@ -58,7 +57,7 @@
 }
 \details{
 	If \code{m=1} is computed the Rolling Origin Evaluation.
-	If \code{m>=length(y)-n1} is computed the Fixed Origin Evaluation, where \code{h} is the required number of forecasting.
+	If \code{m>=length(y)-n1} is computed the Fixed Origin Evaluation.
 	%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
@@ -80,15 +79,15 @@
 	%%  ~~who you are~~
 }
 \note{
-	The \code{otm} function use this function for estimate the theta parameter when the \code{theta} argument is \code{NULL}. 
-	Your computer may go into an infinite looping if you use \code{forecFunction = otm} and not specific a numeric value for the \code{theta} argument.
+	The \code{otm.arxiv} function use this function for estimate the theta parameter when the \code{theta} argument is \code{NULL}. 
+	Your computer may go into an infinite looping if you use \code{forecFunction = otm.arxiv} without specific a numeric value for the \code{theta} argument.
 	%%  ~~further notes~~
 }
 
 	%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{dotm}},  
+	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{dotm}}, \code{\link[forecTheta]{otm.arxiv}} 
 	%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 

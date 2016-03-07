@@ -47,7 +47,7 @@
 }
 
 \seealso{
-	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{otm.arxiv}}, \code{\link[forecTheta]{dotm}}
+	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{stheta}}, \code{\link[forecTheta]{dotm}}
 }
 
 \examples{

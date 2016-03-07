@@ -1,4 +1,4 @@
-\name{forecast}
+\name{otm.arxiv}
 \alias{otm.arxiv}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
@@ -82,7 +82,7 @@
 }
 \details{
 	These functions are fully automatic, you just need to pass your time series. Particular cases are obtained by: 
-	If \code{theta = 1} the \code{tLineExtrapModel} method is computed.
+	If \code{theta = 1} the \code{tLineExtrapModel} method is computed;
 	If \code{theta = 2} so the Standard Theta Method of Assimakopoulos and Nikolopoulos (2000) is computed.
 	
 	By default (\code{s=NULL}), the 90\% significance seasonal Z-test, used by Assimakopoulos and Nikolopoulos (2000), is applied for quarterly and monthly time series. 
@@ -107,13 +107,12 @@
 }
 \note{
 	The \code{thetaM} function is just a particular case of \code{otm} with \code{theta=2}.
-	For compute forecasting using other methods take a look in the \code{forecast} package.
 }
 
 	%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{groe}}, \code{\link[forecast]{forecast}}, \code{\link[forecast]{ses}}
+	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{dotm}}, \code{\link[forecTheta]{groe}}
 }
 \examples{
 

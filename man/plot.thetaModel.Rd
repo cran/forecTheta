@@ -1,4 +1,4 @@
-\name{plot.thetaModel}
+\name{Plot}
 \alias{plot.thetaModel}
 \title{Plot forecasts points and prediction intervals for \code{thetaModel} objects}
 \usage{\method{plot}{thetaModel}(x, ...)
@@ -9,7 +9,7 @@
 \item{...}{Other plotting parameters passed to \code{\link[graphics]{par}}.}
 }
 
-\description{Produces a plot of time series and the forecasts points from Optimised Theta Method.}
+\description{Produces a figure of the time series and the forecasts points from Optimised Theta Method.}
 
 \value{None. Function produces a plot}
 

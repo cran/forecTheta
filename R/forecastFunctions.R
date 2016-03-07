@@ -18,7 +18,9 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 		clim = 1.64/sqrt(length(y)) * sqrt(cumsum(c(1, 2 * xacf^2)))
 		s = abs(xacf[fq]) > clim[fq]
 	}else{
-		s = FALSE
+		if(is.null(s)){
+			s = FALSE
+		}	
 	}
 	
 	if(s){
@@ -160,8 +162,8 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 	out$weights = matrix( c(omega, 1-omega), ncol=1, nrow=2)
 	rownames(out$weights) = c('omega_1', 'omega_2')
 	colnames(out$weights) = 'Estimative'
-	out$fitted = Y_fitted
-	out$residuals = Y_residuals
+	out$fitted = ts(Y_fitted, start = start(y), frequency = frequency(y))
+	out$residuals = ts(Y_residuals, start = start(y), frequency = frequency(y)) 
 	out$mean = Y_fcast
 	out$level = level
 	if(!is.null(level)){
@@ -279,7 +281,7 @@ expSmoot <- function(y, h=5, ell0=NULL, alpha=NULL, lower = c(-1e+10, 0.1), uppe
 	fit$par = matrix(par, ncol=1, nrow=2)
 	rownames(fit$par) = c('ell0','alpha')
 	fit$mean = Y_fcast
-	fit$fitted = Y_fitted
+	fit$fitted = ts(Y_fitted, start = start(y), frequency = frequency(y))
 	fit$residuals = Y_residuals
 
 	return(fit)
@@ -327,7 +329,9 @@ otm.arxiv <- function( y, h=5, s=NULL, theta=NULL, tLineExtrap=expSmoot, g="sAPE
 		clim = 1.64/sqrt(length(y))*sqrt(cumsum(c(1,2*xacf^2)))
 		s = abs(xacf[fq]) > clim[fq]
 	}else{ 
-		s = FALSE 
+		if(is.null(s)){
+			s = FALSE
+		}	 
 	}
 	
 	if(s){

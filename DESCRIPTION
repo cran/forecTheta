@@ -1,8 +1,8 @@
 Package: forecTheta
 Type: Package
 Title: Forecasting Time Series by Theta Models
-Version: 2.0
-Date: 2016-02-29
+Version: 2.1
+Date: 2016-03-07
 Author: Jose Augusto Fiorucci, Francisco Louzada and Bao Yiqi
 Maintainer: Jose Augusto Fiorucci <jafiorucci@gmail.com>
 BugReports: Send an email for <jafiorucci@gmail.com> with title
@@ -12,6 +12,6 @@ Description: Routines for forecasting univariate time series using Theta Models.
 License: GPL (>= 2)
 URL: http://arxiv.org/abs/1503.03529
 NeedsCompilation: no
-Packaged: 2016-03-02 13:13:47 UTC; jafio
+Packaged: 2016-03-07 17:41:32 UTC; jafio
 Repository: CRAN
-Date/Publication: 2016-03-02 16:43:08
+Date/Publication: 2016-03-07 22:43:59

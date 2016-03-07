@@ -1,4 +1,4 @@
-\name{errorMetric}
+\name{Error Metric}
 \alias{errorMetric}
 	%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -74,7 +74,7 @@
 
 	%% ~Make other sections like Warning with \section{Warning }{....} ~
 \seealso{
-	\code{\link[forecTheta]{forecTheta-package}}
+	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{groe}}
 	%%~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
@@ -84,17 +84,17 @@ y1 = 2+ 0.15*(1:20) + rnorm(20,2)
 y2 = y1[20]+ 0.3*(1:30) + rnorm(30,2)
 y =  as.ts(c(y1,y2))
 
-otm.fit <- otm.arxiv(y=as.ts(y[1:40]), h=10)
+out <- dotm(y=as.ts(y[1:40]), h=10)
 
 ### sMAPE metric
-errorMetric(obs=as.ts(y[41:50]), forec=otm.fit$mean)
+errorMetric(obs=as.ts(y[41:50]), forec=out$mean)
 
 ### sMdAPE metric
-errorMetric(obs=as.ts(y[41:50]), forec=otm.fit$mean, statistic = "Md")
+errorMetric(obs=as.ts(y[41:50]), forec=out$mean, statistic = "Md")
 
 ### MASE metric
 meanDiff1 = mean(abs(diff(as.ts(y[1:40]), lag = 1)))
-errorMetric(obs=as.ts(y[41:50]), forec=otm.fit$mean, type = "AE", statistic = "M") / meanDiff1
+errorMetric(obs=as.ts(y[41:50]), forec=out$mean, type = "AE", statistic = "M") / meanDiff1
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -1,4 +1,4 @@
-\name{thetaModels}
+\name{Theta Models}
 \alias{dotm}
 \alias{dstm}
 \alias{otm}
@@ -14,7 +14,7 @@
 	%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 	Functions for forecast univariate time series using the Dynamic Optimised Theta Model, Dynamic Standard Theta Model,
 	Optimised Theta Model and Standard Theta Model (Fiorucci et al, 2016). 
-	We also provide an implementation for the Theta Method (stheta) of Assimakopoulos and Nikolopoulos (2000).
+	We also provide an implementation for the Standard Theta Method (STheta) of Assimakopoulos and Nikolopoulos (2000).
 }
 \usage{
 	dotm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2), 
@@ -44,10 +44,10 @@
 	}
 	\item{s}{
 		If \code{TRUE}, the multiplicative seasonal decomposition is used. 
-		If \code{NULL}, quarterly and monthly time series are tested for statistically seasonal behaviour, with 95\% of significance. Default is NULL.
+		If \code{NULL}, quarterly and monthly time series are tested for statistically seasonal behaviour, with 90\% of significance. Default is NULL.
 	}
 	\item{par_ini}{
-		Vector of inicialization for \code{(ell, alpha, theta)} parameters.
+		Vector of initialization for \code{(ell, alpha, theta)} parameters.
 	}
 	\item{estimation}{
 		If \code{TRUE}, the \code{optim()} function is consider for compute the minimum square estimator of parameters.
@@ -82,10 +82,10 @@
 	\item{$upper}{Upper limits for prediction intervals}  
 }
 \references{
-	Fioruci J.A., Pellegrini T.R., Louzada F., Petropoulos F., Koehler, A. (2016). \emph{Models for optimising the theta method and their relationship to state space models}, 
+	Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F., Koehler, A. (2016). \emph{Models for optimising the theta method and their relationship to state space models}, 
 	International Journal of Forecasting. Accepted Paper. \url{https://www.researchgate.net/publication/294420765_Models_for_optimising_the_theta_method_and_their_relationship_to_state_space_models}
 	
-	Fioruci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. Free available at \url{ http://arxiv.org/abs/1503.03529 }. 
+	Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. Free available at \url{ http://arxiv.org/abs/1503.03529 }. 
 	
 	Assimakopoulos, V. and Nikolopoulos k. (2000). \emph{The theta model: a decomposition approach to forecasting}. International Journal of Forecasting 16, 4, 521-530.	
 }
@@ -156,6 +156,9 @@ plot(out)
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{dotm}
-\keyword{theta-method} % __ONLY ONE__ keyword per line
+\keyword{DOTM}
+\keyword{DSTM}
+\keyword{OTM}
+\keyword{STM}
+\keyword{STheta} % __ONLY ONE__ keyword per line
 \keyword{time series forecasting} % __ONLY ONE__ keyword per line
