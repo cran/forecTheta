@@ -1,5 +1,14 @@
+Version 2.2 (25 May 2016)
+   * fixed a problem in stheta() function when s=F (Thanks Oleh Komashko); 
+   * fixed a problem in otm() function with par_ini argument different of default;     
+   * fixed a problem in seasonal decomposition when part of the seasonal part is zero close;
+   * included the additive seasonal decomposition option;
+   * included the opt.method argument for several funcions;
+   * included the statistical tests Shapiro-Wilk and Teraesvirta Neural Network for 
+   normality and linear 'mean' assumptions, respectively;
+   
 Version 2.1 (07 Mar 2016)
-   * improved documentation	;
+   * improved documentation;
    * fixed a problem with thetaModel class;	
 
 

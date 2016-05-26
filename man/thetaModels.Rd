@@ -18,16 +18,18 @@
 }
 \usage{
 	dotm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2), 
-	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10))
+	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10), 
+	opt.method="Nelder-Mead")
 	
-	dstm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), 
-	estimation=TRUE, lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99))
+	dstm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE, 
+	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead")
 	
 	otm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2), 
-	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10))
+	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10), 
+	opt.method="Nelder-Mead")
 	
-	stm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), 
-	estimation=TRUE, lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99))
+	stm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE, 
+	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead")
 	
 	stheta(y, h=5, s=NULL)
 }
@@ -44,7 +46,9 @@
 	}
 	\item{s}{
 		If \code{TRUE}, the multiplicative seasonal decomposition is used. 
-		If \code{NULL}, quarterly and monthly time series are tested for statistically seasonal behaviour, with 90\% of significance. Default is NULL.
+		If \code{NULL} and \code{frequency(y)>=4} the time series is tested for statistically seasonal behaviour, with 90\% of significance. 
+		If s='additive' or close zero values been find in the multiplicative decomposition, the additive decomposition is performed hatter than multiplicative.
+		Default is NULL.
 	}
 	\item{par_ini}{
 		Vector of initialization for \code{(ell, alpha, theta)} parameters.
@@ -59,6 +63,10 @@
 	\item{upper}{
 		The upper limit of parametric space.
 	}
+	\item{opt.method}{
+		The numeric optimisation method for \code{optim()} function. 
+		Choose one among \code{'Nelder-Mead', 'L-BFGS-B', 'SANN'}.
+	}
 	
 }
 \details{
@@ -71,15 +79,18 @@
 	An object of \code{thetaModel} class with one list containing the elements:
 	\item{$method}{The name of the model/method}
 	\item{$y }{The original time series.}
-	\item{$s}{A binary indication for seasonal decomposition}
+	\item{$s}{A binary indication for seasonal decomposition.}
+	\item{type}{Classical seasonal decomposition type.}
+	\item{opt.method}{The optimisation method used in the \code{optim()} function.}
     \item{$par }{The estimated values for \code{(ell, alpha, theta)} parameters}
 	\item{$weights }{The estimated weights values.}
     \item{$fitted }{A time series element with the fitted points.}
     \item{$residuals }{A time series element with the residual points.}
-    \item{$mean}{The forecasting values}
-	\item{$level}{The levels for prediction intervals}
-	\item{$lower}{Lower limits for prediction intervals}
-	\item{$upper}{Upper limits for prediction intervals}  
+    \item{$mean}{The forecasting values.}
+	\item{$level}{The levels for prediction intervals.}
+	\item{$lower}{Lower limits for prediction intervals.}
+	\item{$upper}{Upper limits for prediction intervals.}
+	\item{$tests}{The p.value of Teraesvirta Neural Network test applied on unseasoned time series and the p.value of Shapiro-Wilk test applied on unseasoned residuals.}
 }
 \references{
 	Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F., Koehler, A. (2016). \emph{Models for optimising the theta method and their relationship to state space models}, 
@@ -99,11 +110,17 @@
 
 \examples{
 
-y1 = 2+ 0.15*(1:20) + rnorm(20,2)
-y2 = y1[20]+ 0.3*(1:30) + rnorm(30,2)
+y1 = 2+ 0.15*(1:20) + rnorm(20)
+y2 = y1[20]+ 0.3*(1:30) + rnorm(30)
 y =  as.ts(c(y1,y2))
-
 out <- dotm(y, h=10)
+summary(out)
+plot(out)
+
+#### additive seasonal decomposition ###
+x = sin(2*pi*seq(0,9,len=300)) + exp((1:300)/150) + rnorm(mean=0,sd=0.5,n=300)
+y = ts(x, frequency=33)
+out <- dotm(y, h=50, s='additive')
 summary(out)
 plot(out)
 
@@ -119,7 +136,7 @@ plot(out)
 #	 if(i \%\% 100 == 0){print(i);}
 #	 x=M3[[i]]$x
 #	 h=M3[[i]]$h
-#	 out = dotm(x,h)
+#	 out = dotm(x,h,level=NULL)
 #	 forec[i,1:h] = out$mean
 #	 obs[i,1:h] = M3[[i]]$xx
 #	 meanDiff[i] = mean(abs(diff(x, lag = frequency(x))))

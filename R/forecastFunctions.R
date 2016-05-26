@@ -1,8 +1,6 @@
 
 ## par = c(ell0, alpha, theta)
-twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2), 
-	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), 
-	upper=c(1e+10, 0.99, 1e+10), dynamic=TRUE){ 
+twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method, dynamic){ 
 	
 	if(!is.ts(y)){ stop("ERROR in twoTL function: y must be a object of time series class."); }
 	if(!is.numeric(h)){	stop("ERROR in twoTL function: h must be a positive integer number.");}
@@ -11,10 +9,15 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 	n = length(y)
 	fq = frequency(y)
 	time_y = time(y)
+	s_type = 'multiplicative'
+	
+	if(!is.null(s)){
+		if(s=='additive'){s=TRUE; s_type='additive';}
+	}
 	
 	#### seasonal test and decomposition ###
-	if(is.null(s) && any(fq == c(4, 12))){
-		xacf = acf(y, plot = FALSE)$acf[-1, 1, 1]
+	if(is.null(s) && fq >= 4){
+		xacf = acf(y, lag.max=fq+1, plot = FALSE)$acf[-1, 1, 1]
 		clim = 1.64/sqrt(length(y)) * sqrt(cumsum(c(1, 2 * xacf^2)))
 		s = abs(xacf[fq]) > clim[fq]
 	}else{
@@ -24,10 +27,27 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 	}
 	
 	if(s){
-		y_decomp = decompose(y, type = "multiplicative")$seasonal
-		y = y/y_decomp
+		# decomp =  decompose(y)
+		# y_decomp = decomp$seasonal
+		# s_type = decomp$type
+		# if(s_type == 'additive'){
+			# y = y - y_decomp
+		# }else{
+			# y = y/y_decomp
+		# }
+		
+		y_decomp = decompose(y, type = s_type)$seasonal
+		if((s_type == 'additive')||(s_type=='multiplicative' && any(y_decomp < 0.01))){
+			s_type = 'additive'
+			y_decomp = decompose(y, type = "additive")$seasonal
+			y = y - y_decomp
+		}else{
+			y = y/y_decomp
+		}	
 	}
 	########################################
+	
+	tnnTest.pvalue = terasvirta.test(y)$p.value
 	
 	mu = ell = A = B = meanY = numeric(n+h)
 	
@@ -81,7 +101,7 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 	cte = mean(abs(y))
 	
 	sse = function(par){
-		if( any(par < lower) ||  any(par > upper) ){return(Inf);}
+		if( any(par < lower) ||  any(par > upper) ){return(1e+10);}
 		mu = SSM(par)$mu
 		errors = (y[1:n] - mu[1:n]) / cte
 		if(dynamic){
@@ -92,8 +112,12 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 	}
 	
 	if(estimation){
-		#opt = optim( par=par_ini, fn=sse, method="L-BFGS-B", lower=lower, upper=upper)
-		opt = optim( par=par_ini, fn=sse, method="Nelder-Mead" )
+		if(opt.method == 'Nelder-Mead')
+			opt = optim( par=par_ini, fn=sse, method="Nelder-Mead" )
+		if(opt.method == 'L-BFGS-B')
+			opt = optim( par=par_ini, fn=sse, method="L-BFGS-B", lower=lower, upper=upper)
+		if(opt.method == 'SANN')	
+			opt = optim( par=par_ini, fn=sse, method="SANN") 
 		
 		par = opt$par
 	}else{
@@ -105,6 +129,7 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 	Y_fcast = ts(mu[(n+1):(n+h)], start = end(y) + c(0, 1), frequency = frequency(y))
 	Y_fitted = mu[1:n]
 	Y_residuals = y - Y_fitted
+	shapTest.pvalue = shapiro.test(Y_residuals[3:n])$p.value
 	
 	if(!is.null(level)){
 		nSample=200
@@ -139,22 +164,37 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 	}
 	
 	if(s){
-		y = y * y_decomp
-		Y_fitted = y_decomp * Y_fitted
-		s_forec = snaive(y_decomp, h = h)$mean
-		Y_fcast =  s_forec * Y_fcast
-		Y_residuals = y - Y_fitted
-		if(!is.null(level)){
-			for(i in 1:ncol(quantiles)){
-				quantiles[,i] = quantiles[,i] * s_forec
+		if(s_type == 'multiplicative'){
+			y = y * y_decomp
+			Y_fitted = y_decomp * Y_fitted
+			s_forec = snaive(y_decomp, h = h)$mean
+			Y_fcast =  s_forec * Y_fcast
+			if(!is.null(level)){
+				for(i in 1:ncol(quantiles)){
+					quantiles[,i] = quantiles[,i] * s_forec
+				}
 			}
-		}	
+		}else{
+			y = y + y_decomp
+			Y_fitted = y_decomp + Y_fitted
+			s_forec = snaive(y_decomp, h = h)$mean
+			Y_fcast =  s_forec + Y_fcast
+			if(!is.null(level)){
+				for(i in 1:ncol(quantiles)){
+					quantiles[,i] = quantiles[,i] + s_forec
+				}
+			}
+		}
+		
+		Y_residuals = y - Y_fitted
 	}
 	
 	out = list()
 	out$method = "Two Theta Lines Model"
 	out$y = y
 	out$s = s
+	if(s){out$type = s_type;}
+	out$opt.method = ifelse(estimation, opt.method, 'none') 
 	out$par = matrix(par, ncol=1, nrow=3)
 	rownames(out$par) = c('ell0','alpha','theta')
 	colnames(out$par) = 'MLE'
@@ -174,23 +214,29 @@ twoTL <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
 		out$lower = out$upper = NULL
 	}
 	
+	out$tests = matrix(c(tnnTest.pvalue,shapTest.pvalue),nrow=2)
+	rownames(out$tests) = c('tnn-test','shapiro-test')
+	colnames(out$tests) = c('p.value')
+	
 	return(	structure(out,class="thetaModel") )
 }
 
 
 dotm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2), 
 	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), 
-	upper=c(1e+10, 0.99, 1e+10) ){
+	upper=c(1e+10, 0.99, 1e+10), opt.method="Nelder-Mead" ){
 	
-	out = twoTL(y=y, h=h, level=level, s=s, par_ini=par_ini, estimation=estimation, lower=lower, upper=upper, dynamic=TRUE)
+	out = twoTL(y=y, h=h, level=level, s=s, par_ini=par_ini, estimation=estimation, lower=lower, 
+		upper=upper, opt.method=opt.method, dynamic=TRUE)
 	out$method = "Dynamic Optimised Theta Model"
 	return(out)	
 }
 
 dstm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), 
-	estimation=TRUE, lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99)){ 
+	estimation=TRUE, lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead"){ 
 	
-	out = twoTL(y=y, h=h, level=level, s=s, par_ini=c(par_ini,2.0), estimation=estimation, lower=c(lower, 1.99999), upper=c(upper, 2.00001))
+	out = twoTL(y=y, h=h, level=level, s=s, par_ini=c(par_ini,2.0), estimation=estimation, lower=c(lower, 1.99999), upper=c(upper, 2.00001), 
+		opt.method=opt.method, dynamic=TRUE)
 	out$method = "Dynamic Standard Theta Model"
 	out$par = as.matrix(out$par[c('ell0','alpha'),])
 	colnames(out$par) = 'MLE'
@@ -198,19 +244,21 @@ dstm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5),
 }
 
 
-otm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2.0), 
+otm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2.0),
 	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), 
-	upper=c(1e+10, 0.99, 1e+10)){
+	upper=c(1e+10, 0.99, 1e+10), opt.method="Nelder-Mead"){
 		
-	out = twoTL(y=y, h=h, level=level, s=s, estimation=estimation, lower=lower, upper=upper, dynamic=FALSE)
+	out = twoTL(y=y, h=h, level=level, s=s, par_ini=par_ini, estimation=estimation, lower=lower, 
+		upper=upper, opt.method=opt.method, dynamic=FALSE)
 	out$method = "Optimised Theta Model"
 	return(out)
 }
 
 stm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE, 
-	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99)){ 
+	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead"){ 
 	
-	out = twoTL(y=y, h=h, level=level, s=s, par_ini=c(par_ini,2.0), estimation=estimation, lower=c(lower,1.99999), upper=c(upper,2.00001), dynamic=FALSE)
+	out = twoTL(y=y, h=h, level=level, s=s, par_ini=c(par_ini,2.0), estimation=estimation, lower=c(lower,1.99999), 
+		upper=c(upper,2.00001), opt.method=opt.method, dynamic=FALSE)
 	out$method = "Standard Theta Model"
 	out$par = as.matrix(out$par[c('ell0','alpha'),])
 	colnames(out$par) = 'MLE'
@@ -404,27 +452,54 @@ stheta <- function (y, h=5, s=NULL) #, ell0=NULL, alpha=NULL)
 	
 	x=y
 	
-	if(is.null(s)){
-		s = FALSE
-		if (any(fq == c(4, 12))) {
-			xacf = acf(y, plot = FALSE)$acf[-1, 1, 1]
-			clim = 1.64/sqrt(length(y)) * sqrt(cumsum(c(1, 2 * xacf^2)))
-			s = abs(xacf[fq]) > clim[fq]
-		}
+	s_type = 'multiplicative'
+	if(!is.null(s)){
+		if(s=='additive'){s=TRUE; s_type='additive';}
+	}
+	
+	#### seasonal test and decomposition ###
+	if(is.null(s) && fq >= 4){
+		xacf = acf(y, lag.max=fq+1, plot = FALSE)$acf[-1, 1, 1]
+		clim = 1.64/sqrt(length(y)) * sqrt(cumsum(c(1, 2 * xacf^2)))
+		s = abs(xacf[fq]) > clim[fq]
+	}else{
+		if(is.null(s)){
+			s = FALSE
+		}	
 	}
 	
 	if(s){
-		y_decomp <- decompose(y, type = "multiplicative")$seasonal
-		y <- y/y_decomp
+		# y_decomp = decompose(y, type = s_type)$seasonal
+		# if(any(y_decomp < 10^(-3))){
+		# #if(any(y <= 0)){
+			# s_type = 'additive'
+			# y_decomp = decompose(y, type = "additive")$seasonal
+			# y = y - y_decomp
+		# }else{
+			# y = y/y_decomp
+		# }
+		
+		y_decomp = decompose(y, type = s_type)$seasonal
+		if((s_type == 'additive')||(s_type=='multiplicative' && any(y_decomp < 0.01))){
+			s_type = 'additive'
+			y_decomp = decompose(y, type = "additive")$seasonal
+			y = y - y_decomp
+		}else{
+			y = y/y_decomp
+		}
 	}
+	
+	########################################
 	
 	l = lm(y ~ time_y)
 	l$mean = l$coeff[1] + l$coeff[2] * time_forec
 	Z <- l$fitted.values + 2 * l$residuals
 	X <- expSmoot(y=Z, h=h)
 	
-	out = stm(y=x, h, level=NULL, par_ini=c(X$par[1]/2, X$par[2]), estimation=FALSE)
+	if(s_type == 'additive'){s='additive';}
+	out = stm(y=x, h=h, level=NULL, s=s, par_ini=c(X$par[1]/2, X$par[2]), estimation=FALSE)
 	out$method = 'Standard Theta Method (STheta)'
+	out$opt.method = 'Nelder-Mead'
 	out$par = as.matrix(c(out$par[1]*2, out$par[2]))
 	rownames(out$par) = c('ell0^*','alpha')
 	colnames(out$par) = 'MLE'
@@ -435,7 +510,13 @@ print.thetaModel <- function(x,...){
 	
 	cat(paste("Forecast method:", x$method, "\n\n"))
 	
-	cat(paste("Seasonal test result:", x$s, "\n\n"))
+	if(x$s){
+		cat(paste("Seasonal decomposition type:", x$type, "\n\n"))
+	}else{
+		cat(paste("Seasonal decomposition: no \n\n"))
+	}
+	
+	cat(paste("Optimisation method:", x$opt.method,"\n\n") )
 	
 	cat(paste("Number of theta lines:", 2, "\n\n"))
 	
@@ -459,6 +540,9 @@ print.thetaModel <- function(x,...){
 	}
 	
 	print( round(mm, 4 ) )
+	
+	#if(x$tests[1,1] < 0.02){cat("\nWarning: According with the Teraesvirta Neural Network test with 98% of confidence, the unseasoned time series is not linearity in mean. This model may not be adequate.\n")}
+	if(x$tests[2,1] < 0.03){cat("\nWarning: According with the Shapiro-Wilk test with 97% of confidence, the unseasoned residuals do not follow the Normal distribution. The prediction intervals may not be adequate.\n")}	
 }
 
 summary.thetaModel <- function(object,...){
@@ -468,6 +552,12 @@ summary.thetaModel <- function(object,...){
 	out$method = object$method
 	
 	out$s = object$s
+	
+	if(object$s){
+		out$type =  object$type
+	}
+	
+	out$opt.method = object$opt.method
 	
 	out$par = object$par
 		
@@ -499,15 +589,24 @@ summary.thetaModel <- function(object,...){
 	
 	out$informationCriterions = ic
 	
+	out$tests = object$tests
+	
 	return(structure(out,class="summ"))
 }
 
 print.summ <- function(x,...){
 	cat(paste("Forecast method:", x$method, "\n\n"))
 	
-	cat(paste("Seasonal test result:", x$s, "\n"))
+	#cat(paste("Seasonal test result:", x$s, "\n"))
+	if(x$s){
+		cat(paste("Seasonal decomposition type:", x$type, "\n\n"))
+	}else{
+		cat(paste("Seasonal decomposition: none \n\n"))
+	}
 	
-	cat("\nEstimative of parameters:\n")
+	cat(paste("Optimisation method:", x$opt.method,"\n\n"))
+	
+	cat("Estimative of parameters:\n")
 	print(round(x$par,2))
 		
 	cat("\nForecasting points and prediction intervals\n")
@@ -515,27 +614,35 @@ print.summ <- function(x,...){
 	
 	cat("\nInformation Criterions\n")
 	print(x$informationCriterions)
+	
+	#if(x$tests[1,1] < 0.02){cat("\nWarning: According with the Teraesvirta Neural Network test with 98% of confidence, the unseasoned time series is not linearity in mean. This model may not be adequate.\n")}
+	if(x$tests[2,1] < 0.03){cat("\nWarning: According with the Shapiro-Wilk test with 97% of confidence, the unseasoned residuals do not follow the Normal distribution. The prediction intervals may not be adequate.\n")}	
 }
 
-plot.thetaModel <- function(x,...){
+plot.thetaModel <- function(x, ylim=NULL, xlim=NULL, ylab=NULL, xlab=NULL, ...){
 	h = length(x$mean)
 	time_y = time(x$y)
 	time_forec = time(x$mean)
-	plot(x$y, xlim=c(time_y[1],time_forec[h]), ylim=c( min(c(x$y,x$fitted,x$mean, x$lower)), max(c(x$y,x$fitted,x$mean, x$upper))),
-	ylab="", xlab="", main=x$method,...)
+
+	if(is.null(ylim)){ ylim=c( min(c(x$y,x$fitted,x$mean, x$lower)), max(c(x$y,x$fitted,x$mean, x$upper)));}
+	if(is.null(xlim)){ xlim=c(time_y[1],time_forec[h]);}
+	if(is.null(ylab)){ ylab="";}
+	if(is.null(xlab)){ xlab="";}
+	
+	plot(x$y, xlim=xlim, ylim=ylim, ylab=ylab, xlab=xlab, main=x$method, ...)
 	
 	if(!is.null(x$lower)&&!is.null(x$upper)){
 		nlev = length(x$level)
 		for(i in nlev:1){
 			yy = c(x$lower[1,i],x$upper[1:h,i],x$lower[h:1,i])
 			xx = c(time_forec[1], time_forec[1:h], time_forec[h:1])
-			polygon(y=yy, x=xx, col=paste('grey', 60+(i-1)*5,sep=''), border=FALSE)
+			polygon(y=yy, x=xx, col=paste('grey', 40+(i-1)*10,sep=''), border=FALSE)
 			#points(x$lower[,i], type = "l", col="red")
 			#points(x$upper[,i], type = "l", col="red")
 		}
 		
-		legend("topleft", legend=c('Forecasting', paste(x$level,'% Predict. Interv.')), lty=rep(1,nlev+1), 
-			lwd=c(3,rep(10,nlev)), col=c('blue',paste('grey', 60+((1:nlev) -1)*5,sep='') ), bty = "n" )
+		legend("topleft", legend=c('Forecasting', paste(x$level,'% Predict. Interv.', sep='')), lty=rep(1,nlev+1), 
+			lwd=c(3,rep(10,nlev)), col=c('blue',paste('grey', 40+((1:nlev) -1)*10,sep='') ), bty = "n" )
 	}
 	
 	points(x$mean, type = "l", col="blue", lwd=2)

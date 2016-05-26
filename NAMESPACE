@@ -1,11 +1,13 @@
-importFrom("stats", "acf", "as.ts", "decompose", "end", "frequency", "is.ts", "lm", "median", "start", "time", "ts","lsfit", "optim", "quantile", "rnorm", "sd")
+importFrom("stats", "acf", "as.ts", "decompose", "end", "frequency", "is.ts", "lm", "median", "start", "time", "ts","lsfit", "optim", "quantile", "rnorm", "sd", "shapiro.test")
 
 importFrom("graphics", "legend", "plot", "points", "polygon")
 
 importFrom("parallel","mclapply")
 
 importFrom("forecast","snaive")
- 
+
+importFrom("tseries","terasvirta.test")
+
 export(dotm, dstm, otm, stm, expSmoot, otm.arxiv, stheta, plot.thetaModel, groe, fixOrig, rolOrig,  errorMetric)
 
 S3method(plot, thetaModel)

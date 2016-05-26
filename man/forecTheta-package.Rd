@@ -17,8 +17,8 @@
 	\tabular{ll}{
 		Package: \tab forecTheta\cr
 		Type: \tab Package\cr
-		Version: \tab 2.1\cr
-		Date: \tab 2016-03-07\cr
+		Version: \tab 2.2\cr
+		Date: \tab 2016-05-25\cr
 		License: \tab GPL (>=2.0) \cr
 	}
 	
@@ -63,9 +63,12 @@
 %% ~~ simple examples of the most important functions ~~
 ##############################################################	
 
-y1 = 2+ 0.15*(1:20) + rnorm(20,2)
-y2 = y1[20]+ 0.3*(1:30) + rnorm(30,2)
+y1 = 2+ 0.15*(1:20) + rnorm(20)
+y2 = y1[20]+ 0.3*(1:30) + rnorm(30)
 y =  as.ts(c(y1,y2))
+out <- dotm(y, h=10)
+summary(out)
+plot(out)
 
 out <- dotm(y=as.ts(y[1:40]), h=10)
 summary(out)

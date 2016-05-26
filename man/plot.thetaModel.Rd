@@ -1,11 +1,15 @@
 \name{Plot}
 \alias{plot.thetaModel}
 \title{Plot forecasts points and prediction intervals for \code{thetaModel} objects}
-\usage{\method{plot}{thetaModel}(x, ...)
+\usage{\method{plot}{thetaModel}(x, ylim=NULL, xlim=NULL, ylab=NULL, xlab=NULL, ...)
 }
 
 \arguments{
 \item{x}{Object of class \dQuote{thetaModel}.}
+\item{ylim}{the y limits of the plot.}
+\item{xlim}{the x limits of the plot.}
+\item{ylab}{a label for the y axis.}
+\item{xlab}{a label for the x axis.}
 \item{...}{Other plotting parameters passed to \code{\link[graphics]{par}}.}
 }
 
