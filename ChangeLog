@@ -1,15 +1,30 @@
+Version 2.6 (11 Nov 2022)
+	* fixed a problem in BugReports
+	* included github page
+	* fixed a problem for h=1
+
+Version 2.5 (17 Jun 2020)
+	* fixed a problem in groe() function
+
+Version 2.4 (17 Feb 2019)
+	* included regressive variables
+
+Version 2.3 (31 May 2016)
+	* plot.thetaModel() improved;
+
+
 Version 2.2 (25 May 2016)
-   * fixed a problem in stheta() function when s=F (Thanks Oleh Komashko); 
-   * fixed a problem in otm() function with par_ini argument different of default;     
+   * fixed a problem in stheta() function when s=F (Thanks Oleh Komashko);
+   * fixed a problem in otm() function with par_ini argument different of default;
    * fixed a problem in seasonal decomposition when part of the seasonal part is zero close;
    * included the additive seasonal decomposition option;
    * included the opt.method argument for several funcions;
-   * included the statistical tests Shapiro-Wilk and Teraesvirta Neural Network for 
+   * included the statistical tests Shapiro-Wilk and Teraesvirta Neural Network for
    normality and linear 'mean' assumptions, respectively;
-   
+
 Version 2.1 (07 Mar 2016)
    * improved documentation;
-   * fixed a problem with thetaModel class;	
+   * fixed a problem with thetaModel class;
 
 
 Version 2.0 (29 Feb 2016)
@@ -18,7 +33,7 @@ Version 2.0 (29 Feb 2016)
    * included S3 functions: plot.thetaModel, print.thetaModel, summary.thetaModel;
    * the old otm() function was renamed to otm.arxiv();
    * the thetaM() function was replaced by stheta() for equivalence with IJF paper;
-   
+
 
 Version 1.1 (31 Jul 2015)
    * NAMESPACE updated;

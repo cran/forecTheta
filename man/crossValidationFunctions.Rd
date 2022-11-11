@@ -7,16 +7,16 @@
 	Generalised Rolling Origin Evaluation
 }
 \description{
-	This function implements the Generalised Rolling Origin Evaluation of Fioruci et al (2015). 
+	This function implements the Generalised Rolling Origin Evaluation of Fioruci et al (2015).
 	Its particular cases include the cross validation methods: Rolling Origin Evaluation and Fixed Origin Evaluation of Tashman(2000).
 	%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-	groe(y, forecFunction, g="sAPE", n1=length(y)-10, m=5, 
+	groe(y, forecFunction, g="sAPE", n1=length(y)-10, m=5,
 	        H=length(y)-n1, p=1+floor((length(y)-n1)/m), ...)
-	
+
 	rolOrig(y, forecFunction, g="sAPE", n1=length(y)-10, ...)
-	
+
 	fixOrig(y, forecFunction, g="sAPE", n1=length(y)-10, ...)
 }
 	%- maybe also 'usage' for other objects documented here.
@@ -26,7 +26,7 @@
 	%%     ~~Describe \code{y} here~~
 	}
 	\item{forecFunction}{
-	A forecasting method as one object of the \code{forecast} class of forecast package. 
+	A forecasting method as one object of the \code{forecast} class of forecast package.
 	%%     ~~Describe \code{forecFunction} here~~
 	}
 	\item{g}{
@@ -34,7 +34,7 @@
 	%%     ~~Describe \code{g} here~~
 	}
 	\item{n1}{
-	The index of the first origin element. 
+	The index of the first origin element.
 	%%     ~~Describe \code{n1} here~~
 	}
 	\item{m}{
@@ -46,7 +46,7 @@
 	%%     ~~Describe \code{H} here~~
 	}
 	\item{p}{
-		The number of origin updates. 
+		The number of origin updates.
 		Default is the maximum.
 	%%     ~~Describe \code{p} here~~
 	}
@@ -69,8 +69,8 @@
 	%% ...
 }
 \references{
-	Fioruci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. Free available at \url{ http://arxiv.org/abs/1503.03529 }. 
-	
+	Fioruci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. arXiv preprint, arXiv:1503.03529.
+
 	Tashman, L.J. (2000). \emph{Out-of-sample tests of forecasting accuracy: an analysis and review}. International Journal of Forecasting 16 (4), 437--450.
 %% ~put references to the literature/web site here ~
 }
@@ -79,7 +79,7 @@
 	%%  ~~who you are~~
 }
 \note{
-	The \code{otm.arxiv} function use this function for estimate the theta parameter when the \code{theta} argument is \code{NULL}. 
+	The \code{otm.arxiv} function use this function for estimate the theta parameter when the \code{theta} argument is \code{NULL}.
 	Your computer may go into an infinite looping if you use \code{forecFunction = otm.arxiv} without specific a numeric value for the \code{theta} argument.
 	%%  ~~further notes~~
 }
@@ -87,7 +87,7 @@
 	%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{dotm}}, \code{\link[forecTheta]{otm.arxiv}} 
+	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{dotm}}, \code{\link[forecTheta]{otm.arxiv}}
 	%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 

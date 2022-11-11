@@ -1,7 +1,7 @@
 \name{Plot}
 \alias{plot.thetaModel}
 \title{Plot forecasts points and prediction intervals for \code{thetaModel} objects}
-\usage{\method{plot}{thetaModel}(x, ylim=NULL, xlim=NULL, ylab=NULL, xlab=NULL, ...)
+\usage{\method{plot}{thetaModel}(x, ylim=NULL, xlim=NULL, ylab=NULL, xlab=NULL, main=NULL, ...)
 }
 
 \arguments{
@@ -10,6 +10,7 @@
 \item{xlim}{the x limits of the plot.}
 \item{ylab}{a label for the y axis.}
 \item{xlab}{a label for the x axis.}
+\item{main}{a main title for the plot.}
 \item{...}{Other plotting parameters passed to \code{\link[graphics]{par}}.}
 }
 

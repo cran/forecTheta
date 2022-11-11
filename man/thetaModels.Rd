@@ -13,24 +13,24 @@
 \description{
 	%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 	Functions for forecast univariate time series using the Dynamic Optimised Theta Model, Dynamic Standard Theta Model,
-	Optimised Theta Model and Standard Theta Model (Fiorucci et al, 2016). 
+	Optimised Theta Model and Standard Theta Model (Fiorucci et al, 2016).
 	We also provide an implementation for the Standard Theta Method (STheta) of Assimakopoulos and Nikolopoulos (2000).
 }
 \usage{
-	dotm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2), 
-	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10), 
-	opt.method="Nelder-Mead")
-	
-	dstm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE, 
-	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead")
-	
-	otm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2), 
-	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10), 
-	opt.method="Nelder-Mead")
-	
-	stm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE, 
-	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead")
-	
+	dotm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
+	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
+	opt.method="Nelder-Mead", xreg=NULL)
+
+	dstm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE,
+	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead", xreg=NULL)
+
+	otm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
+	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
+	opt.method="Nelder-Mead", xreg=NULL)
+
+	stm(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE,
+	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead", xreg=NULL)
+
 	stheta(y, h=5, s=NULL)
 }
 
@@ -45,8 +45,8 @@
 		Levels for prediction intervals.
 	}
 	\item{s}{
-		If \code{TRUE}, the multiplicative seasonal decomposition is used. 
-		If \code{NULL} and \code{frequency(y)>=4} the time series is tested for statistically seasonal behaviour, with 90\% of significance. 
+		If \code{TRUE}, the multiplicative seasonal decomposition is used.
+		If \code{NULL} and \code{frequency(y)>=4} the time series is tested for statistically seasonal behaviour, with 90\% of significance.
 		If s='additive' or close zero values been find in the multiplicative decomposition, the additive decomposition is performed hatter than multiplicative.
 		Default is NULL.
 	}
@@ -64,15 +64,18 @@
 		The upper limit of parametric space.
 	}
 	\item{opt.method}{
-		The numeric optimisation method for \code{optim()} function. 
+		The numeric optimisation method for \code{optim()} function.
 		Choose one among \code{'Nelder-Mead', 'L-BFGS-B', 'SANN'}.
 	}
-	
+	\item{xreg}{
+		A matrix with the regressor variables including the out-of-sample data.
+	}
+
 }
 \details{
-	By default (\code{s=NULL}), the 90\% significance seasonal Z-test, used by Assimakopoulos and Nikolopoulos (2000), is applied for quarterly and monthly time series. 
+	By default (\code{s=NULL}), the 90\% significance seasonal Z-test, used by Assimakopoulos and Nikolopoulos (2000), is applied for quarterly and monthly time series.
 
-	For details of each model see Fiorucci et al, 2016. 
+	For details of each model see Fiorucci et al, 2016.
 	If you are looking for the methods presented in the arXiv paper (Fiorucci et al, 2015), see \code{otm.arxiv()} function.
 	}
 \value{
@@ -93,15 +96,12 @@
 	\item{$tests}{The p.value of Teraesvirta Neural Network test applied on unseasoned time series and the p.value of Shapiro-Wilk test applied on unseasoned residuals.}
 }
 \references{
-	Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F., Koehler, A. (2016). \emph{Models for optimising the theta method and their relationship to state space models}, 
-	International Journal of Forecasting. Accepted Paper. \url{https://www.researchgate.net/publication/294420765_Models_for_optimising_the_theta_method_and_their_relationship_to_state_space_models}
-	
-	Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. Free available at \url{ http://arxiv.org/abs/1503.03529 }. 
-	
-	Assimakopoulos, V. and Nikolopoulos k. (2000). \emph{The theta model: a decomposition approach to forecasting}. International Journal of Forecasting 16, 4, 521-530.	
+	Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F., Koehler, A. (2016). \emph{Models for optimising the theta method and their relationship to state space models},	International Journal of Forecasting, 32 (4), 1151--1161, <doi:10.1016/j.ijforecast.2016.02.005>.
+
+	Assimakopoulos, V. and Nikolopoulos k. (2000). \emph{The theta model: a decomposition approach to forecasting}. International Journal of Forecasting 16, 4, 521--530, <doi:10.1016/S0169-2070(00)00066-2>.
 }
 \author{
-	Jose Augusto Fiorucci, Francisco Louzada and Bao Yiqi
+	Jose Augusto Fiorucci, Francisco Louzada
 }
 
 \seealso{
@@ -124,51 +124,55 @@ out <- dotm(y, h=50, s='additive')
 summary(out)
 plot(out)
 
-######### Reproducing the M3 results by DOTM ############
+# #########################################################
+# ######### Reproducing the M3 results by DOTM ############
+# #########################################################
+#
 # library(Mcomp)
 # data(M3)
 #
 # forec = matrix(NA, nrow=3003, ncol=18)
 # obs = matrix(NA, nrow=3003, ncol=18) #matrix of the out-sample values
 # meanDiff <- rep(1, 3003)
-# 
+#
 # for(i in 1:3003){
-#	 if(i \%\% 100 == 0){print(i);}
-#	 x=M3[[i]]$x
-#	 h=M3[[i]]$h
-#	 out = dotm(x,h,level=NULL)
-#	 forec[i,1:h] = out$mean
-#	 obs[i,1:h] = M3[[i]]$xx
-#	 meanDiff[i] = mean(abs(diff(x, lag = frequency(x))))
+#   x=M3[[i]]$x
+#   h=M3[[i]]$h
+#   out = dotm(x,h,level=NULL)
+#   forec[i,1:h] = out$mean
+#   obs[i,1:h] = M3[[i]]$xx
+#   meanDiff[i] = mean(abs(diff(x, lag = frequency(x))))
 # }
+#
+# ############## sMAPE ###################
+# sAPE_matrix = errorMetric(obs=obs, forec=forec, type="sAPE", statistic="N")
+# #### Yearly ###
+# mean( sAPE_matrix[1:645, 1:6] )
+# #### QUARTERLY ###
+# mean( sAPE_matrix[646:1401, 1:8] )
+# #### MONTHLY ###
+# mean( sAPE_matrix[1402:2829, 1:18] )
+# #### Other ###
+# mean( sAPE_matrix[2830:3003, 1:8] )
+# #### ALL ###
+# mean( sAPE_matrix, na.rm=TRUE )
+# #
+# ############# MASE ######################
+# AE_matrix = errorMetric(obs=obs, forec=forec, type="AE", statistic="N")
+# ASE_matrix=AE_matrix/meanDiff
+# #### Yearly ###
+# mean( ASE_matrix[1:645, 1:6] )
+# #### QUARTERLY ###
+# mean( ASE_matrix[646:1401, 1:8] )
+# #### MONTHLY ###
+# mean( ASE_matrix[1402:2829, 1:18] )
+# #### Other ###
+# mean( ASE_matrix[2830:3003, 1:8] )
+# #### ALL ###
+# mean( ASE_matrix, na.rm=TRUE )
+# ########################################################
 
-############## sMAPE ###################
-#	sAPE_matrix = errorMetric(obs=obs, forec=forec, type="sAPE", statistic="N")
-#### Yearly ###
-#	mean( sAPE_matrix[1:645, 1:6] )
-#### QUARTERLY ###
-#	mean( sAPE_matrix[646:1401, 1:8] )
-#### MONTHLY ###
-#	mean( sAPE_matrix[1402:2829, 1:18] )
-#### Other ###
-#	mean( sAPE_matrix[2830:3003, 1:8] )
-#### ALL ###
-#	mean( sAPE_matrix, na.rm=TRUE )
-#	
-############# MASE ######################	
-#	AE_matrix = errorMetric(obs=obs, forec=forec, type="AE", statistic="N")
-#   ASE_matrix=AE_matrix/meanDiff
-#### Yearly ###
-#	mean( ASE_matrix[1:645, 1:6] )
-#### QUARTERLY ###
-#	mean( ASE_matrix[646:1401, 1:8] )
-#### MONTHLY ###
-#	mean( ASE_matrix[1402:2829, 1:18] )
-#### Other ###
-#	mean( ASE_matrix[2830:3003, 1:8] )
-#### ALL ###
-#	mean( ASE_matrix, na.rm=TRUE )
-########################################################	
+
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

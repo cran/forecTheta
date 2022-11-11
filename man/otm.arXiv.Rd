@@ -8,8 +8,8 @@
 }
 \description{
 	%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-	Functions for forecast univariate time series using the Optimised Theta Method presented in the arxiv paper (Fioruci et al, 2015). 
-	If the theta parameter is not specified so the Generalised Rolling Origin Evaluation is used 
+	Functions for forecast univariate time series using the Optimised Theta Method presented in the arxiv paper (Fioruci et al, 2015).
+	If the theta parameter is not specified so the Generalised Rolling Origin Evaluation is used
 	for select the theta value over the thetaList argument.
 }
 \usage{
@@ -28,12 +28,12 @@
 		%%     ~~Describe \code{h} here~~
 	}
 	\item{s}{
-		If \code{TRUE}, the multiplicative seasonal decomposition is used. 
+		If \code{TRUE}, the multiplicative seasonal decomposition is used.
 		If \code{NULL}, quarterly and monthly time series are tested for statistically seasonal behaviour, with 95\% of significance. Default is NULL.
 		%%     ~~Describe \code{seasonal} here~~
 	}
 	\item{theta}{
-		The value of theta parameter. If \code{theta = NULL} the theta parameter is estimated using the Generalised Rolling Origin Evaluation. 
+		The value of theta parameter. If \code{theta = NULL} the theta parameter is estimated using the Generalised Rolling Origin Evaluation.
 		%% Otherwise, the Optimised Theta Model is computed for \code{theta}.
 		%%     ~~Describe \code{theta} here~~
 	}
@@ -42,16 +42,16 @@
 		%%     ~~Describe \code{tLineExtrap} here~~
 	}
 	\item{g}{
-		The error type that will be used by \code{groe} function for select the \code{theta} value in the estimation process. 
+		The error type that will be used by \code{groe} function for select the \code{theta} value in the estimation process.
 		The possibility values for \code{g}	is \code{"sAPE", "APE", "AE"} and \code{"SE"}.
-		If \code{theta} is not \code{NULL} the \code{g} argument is not used. Default is "sAPE". 
+		If \code{theta} is not \code{NULL} the \code{g} argument is not used. Default is "sAPE".
 		%%     ~~Describe \code{g} here~~
 	}
 	\item{approach}{
 		The approach set-up for \code{groe} parameters (\code{n1, m, H, p}). One letter between \code{'a'} to \code{'h'} according to Fioruci et al (2015).
 	}
 	\item{n1}{
-		The first origin for Generalised Rolling Origin Evaluation. 
+		The first origin for Generalised Rolling Origin Evaluation.
 		This argument is not used if \code{theta!=NULL} or \code{approach!=NULL}.
 		%%     ~~Describe \code{n1} here~~
 	}
@@ -64,7 +64,7 @@
 		%%     ~~Describe \code{H} here~~
 	}
 	\item{p}{
-		The number of origin updates. This argument is not used if \code{theta!=NULL} or \code{approach!=NULL}. 
+		The number of origin updates. This argument is not used if \code{theta!=NULL} or \code{approach!=NULL}.
 		%%     ~~Describe \code{p} here~~
 	}
 	\item{thetaList}{
@@ -81,11 +81,11 @@
 	}
 }
 \details{
-	These functions are fully automatic, you just need to pass your time series. Particular cases are obtained by: 
+	These functions are fully automatic, you just need to pass your time series. Particular cases are obtained by:
 	If \code{theta = 1} the \code{tLineExtrapModel} method is computed;
 	If \code{theta = 2} so the Standard Theta Method of Assimakopoulos and Nikolopoulos (2000) is computed.
-	
-	By default (\code{s=NULL}), the 90\% significance seasonal Z-test, used by Assimakopoulos and Nikolopoulos (2000), is applied for quarterly and monthly time series. 
+
+	By default (\code{s=NULL}), the 90\% significance seasonal Z-test, used by Assimakopoulos and Nikolopoulos (2000), is applied for quarterly and monthly time series.
 }
 \value{
 	An list containing the elements:
@@ -98,12 +98,12 @@
     \item{$weights }{The estimated weights values.}
 }
 \references{
-	Fioruci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. Free available at \url{ http://arxiv.org/abs/1503.03529 }. 
-	
-	Assimakopoulos, V. and Nikolopoulos k. (2000). \emph{The theta model: a decomposition approach to forecasting}. International Journal of Forecasting 16, 4, 521-530.	
+	Fioruci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). \emph{The Optimised Theta Method}. arXiv preprint, arXiv:1503.03529.
+
+	Assimakopoulos, V. and Nikolopoulos k. (2000). \emph{The theta model: a decomposition approach to forecasting}. International Journal of Forecasting 16, 4, 521-530.
 }
 \author{
-	Jose Augusto Fiorucci, Francisco Louzada and Bao Yiqi
+	Jose Augusto Fiorucci, Francisco Louzada
 }
 \note{
 	The \code{thetaM} function is just a particular case of \code{otm} with \code{theta=2}.
@@ -151,7 +151,7 @@ otm.arxiv(y, h=10)
 #mean( sAPE[2830:3003, 1:8] )
 ### ALL
 #mean( sAPE, na.rm=TRUE )
-	
+
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

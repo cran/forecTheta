@@ -1,17 +1,23 @@
 Package: forecTheta
 Type: Package
 Title: Forecasting Time Series by Theta Models
-Version: 2.2
-Date: 2016-05-25
-Author: Jose Augusto Fiorucci, Francisco Louzada and Bao Yiqi
+Version: 2.6.2
+Author: Jose Augusto Fiorucci [aut, cre, cph]
+    (<https://orcid.org/0000-0002-1201-9089>),
+  Francisco Louzada [aut, cph] (<https://orcid.org/0000-0001-7815-9554>)
 Maintainer: Jose Augusto Fiorucci <jafiorucci@gmail.com>
-BugReports: Send an email for <jafiorucci@gmail.com> with title
-        'forecTheta Bug'
-Depends: R (>= 2.0), parallel, forecast, tseries
-Description: Routines for forecasting univariate time series using Theta Models. Contains several cross-validation routines. 
+Description: Routines for forecasting univariate time series using Theta Models.
 License: GPL (>= 2)
-URL: http://arxiv.org/abs/1503.03529
+Encoding: UTF-8
+Depends: R (>= 2.0), forecast, tseries
+Authors@R: c(
+  person("Jose Augusto", "Fiorucci", email="jafiorucci@gmail.com", role=c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-1201-9089")),
+  person("Francisco", "Louzada", email="louzada@icmc.usp.br", role=c("aut", "cph"), comment = c(ORCID = "0000-0001-7815-9554"))
+  )
+BugReports: https://github.com/jafiorucci/forecTheta/issues
+URL:
+        https://www.sciencedirect.com/science/article/pii/S0169207016300243
 NeedsCompilation: no
-Packaged: 2016-05-26 00:52:44 UTC; jafio
+Packaged: 2022-11-11 22:10:15 UTC; jafio
 Repository: CRAN
-Date/Publication: 2016-05-26 09:21:12
+Date/Publication: 2022-11-11 22:30:02 UTC

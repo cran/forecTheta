@@ -1,4 +1,6 @@
-importFrom("stats", "acf", "as.ts", "decompose", "end", "frequency", "is.ts", "lm", "median", "start", "time", "ts","lsfit", "optim", "quantile", "rnorm", "sd", "shapiro.test")
+importFrom("stats", "acf","as.ts","decompose","end","frequency","is.ts","lm","median","start","time","ts","lsfit","optim","quantile","rnorm","sd","shapiro.test","window")
+
+importFrom("utils", "tail")
 
 importFrom("graphics", "legend", "plot", "points", "polygon")
 
@@ -14,3 +16,5 @@ S3method(plot, thetaModel)
 S3method(print, thetaModel)
 S3method(summary, thetaModel)
 S3method(print, summ)
+
+#exportPattern("^[[:alpha:]]+")
