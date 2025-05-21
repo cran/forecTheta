@@ -1,3 +1,14 @@
+
+Version 3.0 (20 may 2025)
+  * included MSIS and ACD metrics for prediction interval evaluation
+  * included unit tests for the package
+  * included bagged functions
+  * included bagging
+  * included BoxCox transformation
+  * included STL decomposition for seasonal time series
+  * included option for check unit root before seasonal test
+  * fixed problem with reverse depends
+
 Version 2.6 (11 Nov 2022)
 	* fixed a problem in BugReports
 	* included github page
@@ -12,7 +23,6 @@ Version 2.4 (17 Feb 2019)
 Version 2.3 (31 May 2016)
 	* plot.thetaModel() improved;
 
-
 Version 2.2 (25 May 2016)
    * fixed a problem in stheta() function when s=F (Thanks Oleh Komashko);
    * fixed a problem in otm() function with par_ini argument different of default;
@@ -26,7 +36,6 @@ Version 2.1 (07 Mar 2016)
    * improved documentation;
    * fixed a problem with thetaModel class;
 
-
 Version 2.0 (29 Feb 2016)
    * included the models: dotm, dstm, otm, stm, stheta, expSmoot;
    * included the class thetaModel;
@@ -34,10 +43,8 @@ Version 2.0 (29 Feb 2016)
    * the old otm() function was renamed to otm.arxiv();
    * the thetaM() function was replaced by stheta() for equivalence with IJF paper;
 
-
 Version 1.1 (31 Jul 2015)
    * NAMESPACE updated;
    * otm() updated;
-
 
 Version 1.0 (15 Apr 2015)

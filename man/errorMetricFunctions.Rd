@@ -6,8 +6,8 @@
 	%%  ~~function to do ... ~~
 }
 \description{
-	This function implements some of the more used error metrics. 
-	These metrics are "sMAPE", "MAPE", "MAE", "MSE" and they respectively versions with median  
+	This function implements some of the more used error metrics.
+	These metrics are "sMAPE", "MAPE", "MAE", "MSE" and they respectively versions with median
 	"sMdAPE", "MdAPE", "MdAE", "MdSE".
 	%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
@@ -29,32 +29,32 @@
 	%%     ~~Describe \code{type} here~~
 }
   \item{statistic}{
-	The statistic to be returned. Use "M" or "Md" for return the mean or median of the errors. 
-	If "N" so a vector with all errors will be returned.  
+	The statistic to be returned. Use "M" or "Md" for return the mean or median of the errors.
+	If "N" so a vector with all errors will be returned.
 	%%     ~~Describe \code{statistic} here~~
 }
 }
 \details{
 	The metric sMAPE is obtained using \code{type = "sAPE"} and  \code{statistic = "M"}
-	
+
 	The metric sMdAPE is obtained using \code{type = "sAPE"} and  \code{statistic = "Md"}
-	
+
 	The metric MAPE is obtained using \code{type = "APE"} and  \code{statistic = "M"}
-	
+
 	The metric MdAPE is obtained using \code{type = "APE"} and  \code{statistic = "Md"}
-	
+
 	The metric MAE is obtained using \code{type = "AE"} and  \code{statistic = "M"}
-	
-	The metric MdAE is obtained using code{type = "AE"} and  \code{statistic = "Md"}
-	
+
+	The metric MdAE is obtained using \code{type = "AE"} and  \code{statistic = "Md"}
+
 	The metric MSE is obtained using \code{type = "SE"} and  \code{statistic = "M"}
-	
+
 	The metric MdSE is obtained using \code{type = "SE"} and  \code{statistic = "Md"}
 	%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
 	If \code{statistic="M"} or \code{statistic="Md"} it is returned the respectively error metric result.
-	If \code{statistic="N"} so is returned a vector with all errors points according to the chosen error type.  
+	If \code{statistic="N"} so is returned a vector with all errors points according to the chosen error type.
 	%%  ~Describe the value returned
 	%%  If it is a LIST, use
 	%%  \item{comp1 }{Description of 'comp1'}
@@ -74,11 +74,11 @@
 
 	%% ~Make other sections like Warning with \section{Warning }{....} ~
 \seealso{
-	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{groe}}
+	\code{\link[forecTheta]{forecTheta-package}}, \code{\link[forecTheta]{PIEval}}, \code{\link[forecTheta]{groe}}
 	%%~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##############################################################	
+##############################################################
 
 y1 = 2+ 0.15*(1:20) + rnorm(20,2)
 y2 = y1[20]+ 0.3*(1:30) + rnorm(30,2)

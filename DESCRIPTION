@@ -1,23 +1,24 @@
 Package: forecTheta
 Type: Package
 Title: Forecasting Time Series by Theta Models
-Version: 2.6.2
-Author: Jose Augusto Fiorucci [aut, cre, cph]
-    (<https://orcid.org/0000-0002-1201-9089>),
-  Francisco Louzada [aut, cph] (<https://orcid.org/0000-0001-7815-9554>)
+Version: 3.0
 Maintainer: Jose Augusto Fiorucci <jafiorucci@gmail.com>
 Description: Routines for forecasting univariate time series using Theta Models.
 License: GPL (>= 2)
 Encoding: UTF-8
-Depends: R (>= 2.0), forecast, tseries
-Authors@R: c(
-  person("Jose Augusto", "Fiorucci", email="jafiorucci@gmail.com", role=c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-1201-9089")),
-  person("Francisco", "Louzada", email="louzada@icmc.usp.br", role=c("aut", "cph"), comment = c(ORCID = "0000-0001-7815-9554"))
-  )
+Depends: R (>= 2.0), forecast, tseries, foreach
+Authors@R: c(person("Jose Augusto", "Fiorucci", role = c("aut", "cre", "cph"), email = "jafiorucci@gmail.com", comment = c(ORCID = "0000-0002-1201-9089")), person("Francisco", "Louzada", role = c("aut", "cph"), comment = c(ORCID = "0000-0001-7815-9554")), person("Igor De Oliveira Barros", "Faluhelyi", role = c("aut","ctb"), comment = c(ORCID = "0009-0008-1637-4476")))
 BugReports: https://github.com/jafiorucci/forecTheta/issues
-URL:
-        https://www.sciencedirect.com/science/article/pii/S0169207016300243
+RoxygenNote: 7.3.2
+Suggests: testthat (>= 3.0.0)
+Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2022-11-11 22:10:15 UTC; jafio
+Packaged: 2025-05-21 02:52:24 UTC; jafio
+Author: Jose Augusto Fiorucci [aut, cre, cph] (ORCID:
+    <https://orcid.org/0000-0002-1201-9089>),
+  Francisco Louzada [aut, cph] (ORCID:
+    <https://orcid.org/0000-0001-7815-9554>),
+  Igor De Oliveira Barros Faluhelyi [aut, ctb] (ORCID:
+    <https://orcid.org/0009-0008-1637-4476>)
 Repository: CRAN
-Date/Publication: 2022-11-11 22:30:02 UTC
+Date/Publication: 2025-05-21 03:20:02 UTC

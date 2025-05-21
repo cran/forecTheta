@@ -1,18 +1,115 @@
 
-## par = c(ell0, alpha, theta)
-twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method, dynamic, xreg=NULL){
+## included in version 2.7.1
+#' Statistical test for seasonal behavior
+#' @aliases seasonal_test
+#' @param y Object of time series class
+#' @param s_test If \code{"default"} time series is tested for statistically seasonal behaviour. If \code{"unit_root"}, then First a difference is taken if a unit root is detected.
+#' @return A logical result indicating whether or not seasonal behavior was detected.
+#' @references
+#' Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F., Koehler, A. (2016). Models for optimising the theta method and their relationship to state space models, International Journal of Forecasting, 32 (4), 1151–1161, <doi:10.1016/j.ijforecast.2016.02.005>.
+#' Assimakopoulos, V. and Nikolopoulos k. (2000). The theta model: a decomposition approach to forecasting. International Journal of Forecasting 16, 4, 521–530, <doi:10.1016/S0169-2070(00)00066-2>.
+#' @details
+#' By default, the 90\% significance seasonal Z-test, used by Assimakopoulos and Nikolopoulos (2000), is applied for quarterly and monthly time series.
+#' The possibility of first checking the unit root was included because it was pointed out that this test presents many flaws for time series with this characteristic (Fiorucci et al, 2016)).
+#' In this case, the KPSS test is performed with a significance level of 5\% and in the case of a unit root, then the series is differentiated before checking for seasonal behavior.
+#' @examples
+#' \donttest{
+#' seasonal_test(AirPassengers)
+#' seasonal_test(AirPassengers, "unit")
+#' }
+#' @export
+seasonal_test = function(y, s_test = c("default","unit_root")){
 
-	if(!is.ts(y)){ stop("ERROR in twoTL function: y must be a object of time series class."); }
+  fq = frequency(y)
+
+  run_s_decomp = FALSE
+  if( fq >= 3 ){
+
+    if( "logical" %in% class(s_test)){
+      run_s_decomp = s_test
+    }else{
+      s_test = match.arg(arg=s_test, choices=c("default","unit_root"))
+
+      yy = y
+      if( s_test == "unit_root" ){
+        if( kpss.test(y)$p.value < 0.05){
+          yy = diff(y)
+        }
+      }
+
+      xacf = acf(yy, lag.max=fq+1, plot = FALSE)$acf[-1, 1, 1]
+      clim = 1.64/sqrt(length(yy)) * sqrt(cumsum(c(1, 2 * xacf^2)))
+      run_s_decomp = abs(xacf[fq]) > clim[fq]
+
+      s_test = paste0(s_test,": ", run_s_decomp)
+
+      rm(yy)
+    }
+
+  }
+
+  return( run_s_decomp )
+}
+
+
+## compute quantiles according to the level,
+## as level=c(80, 90) will compute lo 80, Hi 80, Lo 90, Hi 90
+#
+# bs_series: boostrap series distruted in columns
+# level: a vector with covers probabilities
+bootstrap_quantiles <- function( bs_series, level ){
+
+  nn = length(level)
+  qq = (1-0.01*level)/2
+  probs = numeric(2*nn)
+  probs[2*(1:nn)-1] = qq
+  probs[2*(1:nn)] = 1-qq
+
+  quantiles = t( apply(X=bs_series, MARGIN=1, FUN=quantile, probs=probs) )
+  colnames(quantiles) = unlist( lapply(X=1:nn, FUN=function(X) paste(c('Lo','Hi'), level[X]) ) )
+
+  return( quantiles )
+}
+
+
+## par = c(ell0, alpha, theta)
+## s_type = c("additive","multiplicative","stl")
+## s_test = c("default","unit_root",TRUE, FALSE)
+
+twoTL <- function(y, h, level,
+                  s_type, ## s_type = c("additive","multiplicative","stl")
+                  s_test, ## s_test = c("default","unit_root",TRUE, FALSE)
+                  par_ini, estimation, lower, upper, opt.method, dynamic, xreg=NULL,
+                  lambda=NULL,   ## parameter of Box-Cox transformation,
+                  nSample=10000,   ## used to compute bootstrap prediction intervals,
+                  s = NULL  ## deprecated argument
+                  )
+  {
+
+	if(!is.ts(y)){ stop("ERROR in twoTL function: y must be an object of time series class."); }
 	if(!is.numeric(h)){	stop("ERROR in twoTL function: h must be a positive integer number.");}
 	if( any(par_ini < lower) ||  any(par_ini > upper) ){stop("ERROR in twoTL function: par_ini out of range.");}
+
+  # Conversion of deprecated argument to new arguments.
+  if(!is.null(s)){
+    if(is.logical(s)){
+      s_test = s
+    }else{
+      if (s == "additive"){
+        s_type = "additive"
+      }
+    }
+  }
 
 	n = length(y)
 	fq = frequency(y)
 	time_y = time(y)
-	s_type = 'multiplicative'
 
-	if(!is.null(s)){
-		if(s=='additive'){s=TRUE; s_type='additive';}
+	if(!is.null(lambda)){
+	  if(lambda == "auto"){
+	    lambda = BoxCox.lambda(y, lower=0, upper=1)
+	  }
+	  y = BoxCox(y, lambda)
 	}
 
 	if(!is.null(xreg)){
@@ -38,25 +135,31 @@ twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method,
 	}
 
 	#### seasonal test and decomposition ###
-	if(is.null(s) && fq >= 4){
-		xacf = acf(y, lag.max=fq+1, plot = FALSE)$acf[-1, 1, 1]
-		clim = 1.64/sqrt(length(y)) * sqrt(cumsum(c(1, 2 * xacf^2)))
-		s = abs(xacf[fq]) > clim[fq]
-	}else{
-		if(is.null(s)){
-			s = FALSE
-		}
-	}
 
-	if(s){
-		y_decomp = decompose(y, type = s_type)$seasonal
-		if((s_type == 'additive')||(s_type=='multiplicative' && any(y_decomp < 0.01))){
-			s_type = 'additive'
-			y_decomp = decompose(y, type = "additive")$seasonal
-			y = y - y_decomp
-		}else{
-			y = y/y_decomp
-		}
+	run_s_decomp = seasonal_test(y, s_test)
+  if( fq < 3 ){
+    s_type="None";s_type="None";
+  }
+
+	if( run_s_decomp ){
+
+	  s_type = match.arg(arg=s_type, choices=c("additive","multiplicative","stl"))
+
+	  if( s_type == "multiplicative" ){
+	    y_decomp = decompose(y, type = "multiplicative")$seasonal
+	    y = y/y_decomp
+	  }
+
+	  if( s_type == "additive" ){
+	    y_decomp = decompose(y, type = "additive")$seasonal
+	    y = y- y_decomp
+	  }
+
+	  if( s_type == "stl" ){
+	    y_decomp = mstl(y)[,3]
+	    y = y - y_decomp
+	  }
+
 	}
 	########################################
 
@@ -69,6 +172,7 @@ twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method,
 
 	new_y = as.numeric(y)
 
+	# state space model
 	SSM = function(par, computeForec=FALSE){
 		ell0 = par[1]
 		alpha = par[2]
@@ -126,8 +230,9 @@ twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method,
 		return( list(mu=mu, ell=ell, A=A, B=B, meanY=meanY) )
 	}
 
-	cte = mean(abs(y))
+	cte = mean(abs(y)) ## constante
 
+	# sun of squared error
 	sse = function(par){
 		if( any(par < lower) ||  any(par > upper) ){return(1e+300);}
 		mu = SSM(par)$mu
@@ -160,8 +265,10 @@ twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method,
 
 	shapTest.pvalue = shapiro.test(Y_residuals[tail(3:n,4999)])$p.value
 
+	matForec.sample = NULL ## initialize
+
 	if(!is.null(level)){
-		nSample=200
+		#nSample=200
 		level = sort(level)
 		alpha = par[2]
 		theta = par[3]
@@ -181,55 +288,84 @@ twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method,
 			A = meanY - B*(i+2)/2
 		}
 
-		nn = length(level)
-		qq = (1-0.01*level)/2
-		probs = numeric(2*nn)
-		probs[2*(1:nn)-1] = qq
-		probs[2*(1:nn)] = 1-qq
+		# nn = length(level)
+		# qq = (1-0.01*level)/2
+		# probs = numeric(2*nn)
+		# probs[2*(1:nn)-1] = qq
+		# probs[2*(1:nn)] = 1-qq
+		#
+		# quantiles = t( apply(X=matForec.sample, MARGIN=2, FUN=quantile, probs=probs) )
 
-		quantiles = t( apply(X=matForec.sample, MARGIN=2, FUN=quantile, probs=probs) )
+		## included in version 2.7.3, it's used to compute bagging forecasts
+		matForec.sample = t( matForec.sample )
+		quantiles = bootstrap_quantiles( bs_series=matForec.sample, level=level )
+		quantiles = ts( quantiles, start = end(y) + c(0, 1), frequency = frequency(y))
+		#colnames(quantiles) = unlist( lapply(X=1:length(level), FUN=function(X) paste(c('Lo','Hi'), level[X]) ) )
+	  matForec.sample = ts( matForec.sample , start = end(y) + c(0, 1), frequency = frequency(y) )
+	  colnames( matForec.sample ) = paste0( "sample", 1:ncol(matForec.sample) )
+		##
+
 		if(!is.null(xreg)){
 			reg = par[-(1:3)]
 			y_reg  = as.numeric(xreg[-(1:n),] %*% reg)
 			quantiles = quantiles + y_reg
+
+			matForec.sample = matForec.sample + y_reg;
 		}
-		quantiles = ts( quantiles, start = end(y) + c(0, 1), frequency = frequency(y))
-		colnames(quantiles) = unlist( lapply(X=1:nn, FUN=function(X) paste(c('Lo','Hi'), level[X]) ) )
+
 	}
 
-	if(s){
+	if(run_s_decomp){
 		if(s_type == 'multiplicative'){
 			y = y * y_decomp
 			Y_fitted = y_decomp * Y_fitted
 			s_forec = snaive(y_decomp, h = h)$mean
 			Y_fcast =  s_forec * Y_fcast
 			if(!is.null(level)){
-				for(i in 1:ncol(quantiles)){
-					quantiles[,i] = quantiles[,i] * s_forec
-				}
+				# for(i in 1:ncol(quantiles)){
+				# 	quantiles[,i] = quantiles[,i] * s_forec
+				# }
+			  quantiles = quantiles * replicate( ncol(quantiles), s_forec )
+
+			  matForec.sample = matForec.sample * replicate( ncol(matForec.sample), s_forec )
 			}
+
 		}else{
 			y = y + y_decomp
 			Y_fitted = y_decomp + Y_fitted
 			s_forec = snaive(y_decomp, h = h)$mean
 			Y_fcast =  s_forec + Y_fcast
 			if(!is.null(level)){
-				for(i in 1:ncol(quantiles)){
-					quantiles[,i] = quantiles[,i] + s_forec
-				}
+				# for(i in 1:ncol(quantiles)){
+				# 	quantiles[,i] = quantiles[,i] + s_forec
+				# }
+			  quantiles = quantiles + replicate( ncol(quantiles), s_forec )
+
+			  matForec.sample = matForec.sample + replicate( ncol(matForec.sample), s_forec )
 			}
+
 		}
 
 		Y_residuals = y - Y_fitted
 	}
 
+	if(!is.null(lambda)){
+	  y = InvBoxCox(y, lambda)
+	  Y_fcast = InvBoxCox(Y_fcast, lambda)
+	  if(!is.null(level)){
+	    quantiles = InvBoxCox(quantiles, lambda)
+	    matForec.sample =  InvBoxCox(matForec.sample, lambda);
+	  }
+	}
+
 	out = list()
 	out$method = "Two Theta Lines Model"
 	out$y = y
-	out$s = s
-	if(s){out$type = s_type;}
+	out$s_type = s_type
+	out$s_test = s_test
 	out$opt.method = ifelse(estimation, opt.method, 'none')
 	out$par = matrix(par, ncol=1)
+	out$lambda = lambda
 	if(is.null(xreg)){
 		rownames(out$par) = c('ell0','alpha','theta')
 	}else{
@@ -251,7 +387,7 @@ twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method,
 	}else{
 		out$lower = out$upper = NULL
 	}
-
+  out$matForec.sample = matForec.sample
 	out$tests = matrix(c(tnnTest.pvalue,shapTest.pvalue),nrow=2)
 	rownames(out$tests) = c('tnn-test','shapiro-test')
 	colnames(out$tests) = c('p.value')
@@ -260,52 +396,255 @@ twoTL <- function(y, h, level, s, par_ini, estimation, lower, upper, opt.method,
 }
 
 
-dotm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2),
-	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0),
-	upper=c(1e+10, 0.99, 1e+10), opt.method="Nelder-Mead", xreg=NULL ){
+######### Theta Models #########################################################
+## models of
+## Fiorucci J.A., Pellegrini T.R., Louzada F., Petropoulos F.,  Koehler, A.
+## (2016). Models for optimising the theta method and their relationship to
+## state space models, International Journal of Forecasting, 32 (4), 1151–1161,
+## <doi:10.1016/j.ijforecast.2016.02.005>
+dotm <- function(y, h=5, level=c(80,90,95),
+                 s_type="multiplicative",
+                 s_test="default",
+                 lambda=NULL, par_ini=c(y[1]/2, 0.5, 2), estimation=TRUE,
+                 lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
+                 opt.method="Nelder-Mead", xreg=NULL, s=NULL ){
 
-	out = twoTL(y=y, h=h, level=level, s=s, par_ini=par_ini, estimation=estimation, lower=lower,
-		upper=upper, opt.method=opt.method, dynamic=TRUE, xreg=xreg)
-	out$method = "Dynamic Optimised Theta Model"
-	return(out)
+  out =  twoTL( y=y, h=h, level=level,
+                s_type=s_type, s_test=s_test, par_ini=par_ini,
+                estimation=estimation, lower=lower, upper=upper, opt.method=opt.method,
+                dynamic=TRUE, xreg=xreg, lambda=lambda, s=s)
+
+  out$method = "Dynamic Optimised Theta Model"
+
+  return(out)
 }
 
-dstm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5),
-	estimation=TRUE, lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead", xreg=NULL){
+dstm <- function(y, h=5, level=c(80,90,95),
+                 s_type="multiplicative", s_test="default",
+                 lambda=NULL, par_ini=c(y[1]/2, 0.5),estimation=TRUE,
+                 lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99),
+                 opt.method="Nelder-Mead", xreg=NULL,
+                 s=NULL){
 
-	out = twoTL(y=y, h=h, level=level, s=s, par_ini=c(par_ini,2.0), estimation=estimation, lower=c(lower, 1.99999), upper=c(upper, 2.00001),
-		opt.method=opt.method, dynamic=TRUE, xreg=xreg)
-	out$method = "Dynamic Standard Theta Model"
-	out$par = as.matrix(out$par[c('ell0','alpha'),])
-	colnames(out$par) = 'MLE'
-	return(out)
+  out =  twoTL( y=y, h=h, level=level,
+                s_type=s_type, s_test=s_test, par_ini=c(par_ini,2.0),
+                estimation=estimation, lower=c(lower, 1.99999), upper=c(upper, 2.00001),
+                opt.method=opt.method, dynamic=TRUE, xreg=xreg, lambda=lambda, s=s)
+
+  out$method = "Dynamic Standard Theta Model"
+  out$par = as.matrix(out$par[c('ell0','alpha'),])
+  colnames(out$par) = 'MLE'
+
+  return(out)
 }
 
 
-otm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5, 2.0),
-	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0),
-	upper=c(1e+10, 0.99, 1e+10), opt.method="Nelder-Mead", xreg=NULL){
+otm <- function(y, h=5, level=c(80,90,95),
+                s_type="multiplicative", s_test="default",
+                lambda=NULL, par_ini=c(y[1]/2, 0.5, 2.0), estimation=TRUE,
+                lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
+                opt.method="Nelder-Mead", xreg=NULL, s=NULL){
 
-	out = twoTL(y=y, h=h, level=level, s=s, par_ini=par_ini, estimation=estimation, lower=lower,
-		upper=upper, opt.method=opt.method, dynamic=FALSE, xreg=xreg)
-	out$method = "Optimised Theta Model"
-	return(out)
+  out = twoTL( y=y, h=h, level=level,
+               s_type=s_type, s_test=s_test,
+               par_ini=par_ini, estimation=estimation, lower=lower,
+               upper=upper, opt.method=opt.method, dynamic=FALSE, xreg=xreg,
+               lambda=lambda, s=s)
+
+  out$method = "Optimised Theta Model"
+
+  return(out)
 }
 
-stm <- function(y, h=5, level=c(80,90,95), s=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE,
-	lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99), opt.method="Nelder-Mead", xreg=NULL){
+stm <- function(y, h=5, level=c(80,90,95),
+                s_type="multiplicative", s_test="default",
+                lambda=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE,
+                lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99),
+                opt.method="Nelder-Mead", xreg=NULL, s=NULL){
 
-	out = twoTL(y=y, h=h, level=level, s=s, par_ini=c(par_ini,2.0), estimation=estimation, lower=c(lower,1.99999),
-		upper=c(upper,2.00001), opt.method=opt.method, dynamic=FALSE, xreg=xreg)
-	out$method = "Standard Theta Model"
-	out$par = as.matrix(out$par[c('ell0','alpha'),])
-	colnames(out$par) = 'MLE'
-	return(out)
+  out = twoTL( y=y, h=h, level=level,
+               s_type=s_type, s_test=s_test,
+               par_ini=c(par_ini,2.0), estimation=estimation,
+               lower=c(lower,1.99999), upper=c(upper,2.00001),
+               opt.method=opt.method, dynamic=FALSE, xreg=xreg, lambda=lambda,
+               s=s)
+
+  out$method = "Standard Theta Model"
+  out$par = as.matrix(out$par[c('ell0','alpha'),])
+  colnames(out$par) = 'MLE'
+
+  return(out)
+}
+################################################################################
+
+
+
+############ Bagged Models #####################################################
+bagged_twoTL <- function(y, h, level,
+                        num_bootstrap = 1,   # number of bootstrap replication
+                        bs_bootstrap = NULL, # bootstrap block size
+                        s_type, ## s_type = c("additive","multiplicative","stl")
+                        s_test, ## s_test = c("default","unit_root",TRUE, FALSE)
+                        par_ini, estimation, lower, upper, opt.method, dynamic, xreg=NULL,
+                        lambda=NULL  ## parameter of Box-Cox transformation
+                        )
+{
+
+  nSample = 10000
+  y_bagged = list(y)
+  if(num_bootstrap > 1 ){
+    y_bagged = bld.mbb.bootstrap(y, num=num_bootstrap)
+    nSample = max( nSample %/% num_bootstrap, 1)
+  }
+
+  if(num_bootstrap>1 && is.null(level)){level=c(80,90,95);} ## important for running bagging
+
+  y_i = NULL
+  models = foreach(y_i = y_bagged) %do% {
+
+      fit = twoTL(y=y_i, h=h, level=level, s_type=s_type, s_test=s_test,
+              par_ini=par_ini, estimation=estimation, lower=lower, upper=upper,
+              opt.method=opt.method, dynamic=dynamic, xreg=xreg, lambda=lambda,
+              nSample=nSample)
+
+      fit
+  }
+
+  out = models[[1]]
+  out$num_bootstrap = num_bootstrap
+
+  if( num_bootstrap == 1 ){
+    out$matForec.sample = NULL
+    return(out);
+  }
+
+  # bs_means = foreach(fit = models, .combine=cbind) %do% { fit$mean; }
+  # colnames(bs_means) = paste0("m", 1:ncol(bs_means) )
+  # bs_means_mean = ts(rowMeans(bs_means), start=start(bs_means), frequency = frequency(y))
+  # bs_means_median = apply(X=bs_means, MARGIN=1, FUN=quantile,  probs=0.5)
+  # bs_means_median = ts(bs_means_median, start=start(bs_means), frequency = frequency(y))
+  # out$bs_means_mean = bs_means_mean
+  # out$bs_means_median = bs_means_median
+
+  bs_strapolations = foreach(fit = models, .combine=cbind) %do% { fit$matForec.sample; }
+  colnames(bs_strapolations) = paste0("m", 1:ncol(bs_strapolations) )
+  bs_st_mean = ts(rowMeans(bs_strapolations), start=start(out$mean), frequency = frequency(y))
+  bs_st_median = apply(X=bs_strapolations, MARGIN=1, FUN=quantile,  probs=0.5)
+  bs_st_median = ts(bs_st_median, start=start(out$mean), frequency = frequency(y))
+
+  out$mean = bs_st_mean
+  out$median =  bs_st_median
+
+  quantiles = bootstrap_quantiles( bs_series=bs_strapolations, level=level )
+  quantiles = ts( quantiles, start = end(y) + c(0, 1), frequency = frequency(y))
+  nn = length(level)
+  out$lower = quantiles[, 2*(1:nn)-1, drop=F]
+  out$upper = quantiles[, 2*(1:nn), drop=F]
+
+  out$matForec.sample = NULL
+  out$tests = NULL
+
+  return(out)
 }
 
 
-############  SES  ################################
-expSmoot <- function(y, h=5, ell0=NULL, alpha=NULL, lower = c(-1e+10, 0.1), upper = c(1e+10, 0.99)){
+
+
+bagged_dotm <- function(y, h=5, level=c(80,90,95),
+                 num_bootstrap = 100,   # number of bootstrap replication
+                 bs_bootstrap = NULL, # bootstrap block size
+                 s_type="multiplicative",
+                 s_test="default",
+                 lambda=NULL, par_ini=c(y[1]/2, 0.5, 2), estimation=TRUE,
+                 lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
+                 opt.method="Nelder-Mead", xreg=NULL ){
+
+  out =  bagged_twoTL( y=y, h=h, level=level,
+                       num_bootstrap = num_bootstrap, bs_bootstrap = bs_bootstrap,
+                       s_type=s_type, s_test=s_test, par_ini=par_ini,
+                       estimation=estimation, lower=lower, upper=upper, opt.method=opt.method,
+                       dynamic=TRUE, xreg=xreg, lambda=lambda)
+
+  out$method = "Dynamic Optimised Theta Model"
+  if(out$num_bootstrap > 1){ out$method = paste("Bagged", out$method); }
+
+  return(out)
+}
+
+bagged_dstm <- function(y, h=5, level=c(80,90,95),
+                 num_bootstrap = 100,   # number of bootstrap replication
+                 bs_bootstrap = NULL, # bootstrap block size
+                 s_type="multiplicative", s_test="default",
+                 lambda=NULL, par_ini=c(y[1]/2, 0.5),estimation=TRUE,
+                 lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99),
+                 opt.method="Nelder-Mead", xreg=NULL){
+
+  out =  bagged_twoTL( y=y, h=h, level=level,
+                       num_bootstrap = num_bootstrap, bs_bootstrap = bs_bootstrap,
+                       s_type=s_type, s_test=s_test, par_ini=c(par_ini,2.0),
+                       estimation=estimation, lower=c(lower, 1.99999), upper=c(upper, 2.00001),
+                       opt.method=opt.method, dynamic=TRUE, xreg=xreg, lambda=lambda)
+
+  out$method = "Dynamic Standard Theta Model"
+  if(out$num_bootstrap > 1){ out$method = paste("Bagged", out$method); }
+  out$par = as.matrix(out$par[c('ell0','alpha'),])
+  colnames(out$par) = 'MLE'
+
+  return(out)
+}
+
+
+bagged_otm <- function(y, h=5, level=c(80,90,95),
+                num_bootstrap = 100,   # number of bootstrap replication
+                bs_bootstrap = NULL, # bootstrap block size
+                s_type="multiplicative", s_test="default",
+                lambda=NULL, par_ini=c(y[1]/2, 0.5, 2.0), estimation=TRUE,
+                lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
+                opt.method="Nelder-Mead", xreg=NULL){
+
+  out = bagged_twoTL( y=y, h=h, level=level,
+                      num_bootstrap = num_bootstrap, bs_bootstrap = bs_bootstrap,
+                      s_type=s_type, s_test=s_test,
+                      par_ini=par_ini, estimation=estimation, lower=lower,
+                      upper=upper, opt.method=opt.method, dynamic=FALSE, xreg=xreg,
+                      lambda=lambda)
+
+  out$method = "Optimised Theta Model"
+  if(out$num_bootstrap > 1){ out$method = paste("Bagged", out$method); }
+
+  return(out)
+}
+
+bagged_stm <- function(y, h=5, level=c(80,90,95),
+                num_bootstrap = 100,   # number of bootstrap replication
+                bs_bootstrap = NULL, # bootstrap block size
+                s_type="multiplicative", s_test="default",
+                lambda=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE,
+                lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99),
+                opt.method="Nelder-Mead", xreg=NULL){
+
+  out = bagged_twoTL( y=y, h=h, level=level,
+                      num_bootstrap = num_bootstrap, bs_bootstrap = bs_bootstrap,
+                      s_type=s_type, s_test=s_test,
+                      par_ini=c(par_ini,2.0), estimation=estimation,
+                      lower=c(lower,1.99999), upper=c(upper,2.00001),
+                      opt.method=opt.method, dynamic=FALSE, xreg=xreg, lambda=lambda)
+
+  out$method = "Standard Theta Model"
+  if(out$num_bootstrap > 1){ out$method = paste("Bagged", out$method); }
+  out$par = as.matrix(out$par[c('ell0','alpha'),])
+  colnames(out$par) = 'MLE'
+
+  return(out)
+}
+################################################################################
+
+
+
+
+###################  SES  ######################################################
+expSmoot <- function(y, h=5, ell0=NULL, alpha=NULL, lower = c(-1e+10, 0.1),
+                     upper = c(1e+10, 0.99)){
 	n = length(y)
 
 	mu = error = ell = numeric(n+h)
@@ -323,7 +662,8 @@ expSmoot <- function(y, h=5, ell0=NULL, alpha=NULL, lower = c(-1e+10, 0.1), uppe
 			ell[i] = ell[i-1] + alpha*error[i]
 		}
 
-		return( list(mean = mu[(n+1):(n+h)], fitted = mu[1:n], error = error[1:n], ell0=ell0, alpha=alpha)  )
+		return( list(mean = mu[(n+1):(n+h)], fitted = mu[1:n], error = error[1:n],
+		             ell0=ell0, alpha=alpha)  )
 	}
 
 	### sum of square error
@@ -373,9 +713,13 @@ expSmoot <- function(y, h=5, ell0=NULL, alpha=NULL, lower = c(-1e+10, 0.1), uppe
 	return(fit)
 
 }
+################################################################################
 
 
 
+####### OTM as implementade in Fioruci et al (2015)#############################
+## Fioruci J.A., Pellegrini T.R., Louzada F., Petropoulos F. (2015). The Optimised
+# Theta Method. arXiv preprint, arXiv:1503.03529.
 otm.arxiv <- function( y, h=5, s=NULL, theta=NULL, tLineExtrap=expSmoot, g="sAPE",
 		approach="c",
 		n1=NULL, m=NULL, H=NULL, p=NULL,
@@ -478,55 +822,58 @@ otm.arxiv <- function( y, h=5, s=NULL, theta=NULL, tLineExtrap=expSmoot, g="sAPE
 }
 
 
-stheta <- function (y, h=5, s=NULL) #, ell0=NULL, alpha=NULL)
+stheta <- function (y, h=5, s_type="multiplicative", s_test="default", s=NULL)
 {
 	if(!is.ts(y)){ stop("ERROR in stheta function: y must be a object of time series class."); }
 	if(!is.numeric(h)){	stop("ERROR in stheta function: h must be a positive integer number.");}
+
+  # Conversion of deprecated argument to new arguments.
+  if(!is.null(s)){
+    if(is.logical(s)){
+      s_test = s
+    }else{
+      if (s == "additive"){
+        s_type = "additive"
+      }
+    }
+  }
 
 	n = length(y)
 	fq = frequency(y)
 	time_y = time(y)
 	time_forec = time_y[n] + (1:h)/fq
+	#s_type = 'multiplicative'
+	#s_test = "default"
 
 	x=y
 
-	s_type = 'multiplicative'
-	if(!is.null(s)){
-		if(s=='additive'){s=TRUE; s_type='additive';}
-	}
-
 	#### seasonal test and decomposition ###
-	if(is.null(s) && fq >= 4){
-		xacf = acf(y, lag.max=fq+1, plot = FALSE)$acf[-1, 1, 1]
-		clim = 1.64/sqrt(length(y)) * sqrt(cumsum(c(1, 2 * xacf^2)))
-		s = abs(xacf[fq]) > clim[fq]
-	}else{
-		if(is.null(s)){
-			s = FALSE
-		}
+	run_s_decomp = seasonal_test(y, s_test)
+
+	if( fq < 3 ){
+	  s_type="None";s_type="None";
 	}
 
-	if(s){
-		# y_decomp = decompose(y, type = s_type)$seasonal
-		# if(any(y_decomp < 10^(-3))){
-		# #if(any(y <= 0)){
-			# s_type = 'additive'
-			# y_decomp = decompose(y, type = "additive")$seasonal
-			# y = y - y_decomp
-		# }else{
-			# y = y/y_decomp
-		# }
+	if( run_s_decomp ){
 
-		y_decomp = decompose(y, type = s_type)$seasonal
-		if((s_type == 'additive')||(s_type=='multiplicative' && any(y_decomp < 0.01))){
-			s_type = 'additive'
-			y_decomp = decompose(y, type = "additive")$seasonal
-			y = y - y_decomp
-		}else{
-			y = y/y_decomp
-		}
+	  s_type = match.arg(arg=s_type, choices=c("additive","multiplicative","stl"))
+
+	  if( s_type == "multiplicative" ){
+	    y_decomp = decompose(y, type = "multiplicative")$seasonal
+	    y = y/y_decomp
+	  }
+
+	  if( s_type == "additive" ){
+	    y_decomp = decompose(y, type = "additive")$seasonal
+	    y = y- y_decomp
+	  }
+
+	  if( s_type == "stl" ){
+	    y_decomp = mstl(y)[,3]
+	    y = y - y_decomp
+	  }
+
 	}
-
 	########################################
 
 	l = lm(y ~ time_y)
@@ -534,8 +881,9 @@ stheta <- function (y, h=5, s=NULL) #, ell0=NULL, alpha=NULL)
 	Z <- l$fitted.values + 2 * l$residuals
 	X <- expSmoot(y=Z, h=h)
 
-	if(s_type == 'additive'){s='additive';}
-	out = stm(y=x, h=h, level=NULL, s=s, par_ini=c(X$par[1]/2, X$par[2]), estimation=FALSE)
+	out = stm(y=x, h=h, level=NULL, s_type=s_type, s_test=s_test,
+	          par_ini=c(X$par[1]/2, X$par[2]), estimation=FALSE)
+
 	out$method = 'Standard Theta Method (STheta)'
 	out$opt.method = 'Nelder-Mead'
 	out$par = as.matrix(c(out$par[1]*2, out$par[2]))
@@ -544,15 +892,16 @@ stheta <- function (y, h=5, s=NULL) #, ell0=NULL, alpha=NULL)
 	return(out)
 }
 
+################################################################################
+
+#' @export
 print.thetaModel <- function(x,...){
 
 	cat(paste("Forecast method:", x$method, "\n\n"))
 
-	if(x$s){
-		cat(paste("Seasonal decomposition type:", x$type, "\n\n"))
-	}else{
-		cat(paste("Seasonal decomposition: no \n\n"))
-	}
+  cat(paste("Seasonal decomposition type:", x$s_type, "\n\n"))
+
+  cat(paste("Seasonal test:", x$s_test, "\n\n"))
 
 	cat(paste("Optimisation method:", x$opt.method,"\n\n") )
 
@@ -563,6 +912,10 @@ print.thetaModel <- function(x,...){
 
 	cat("\nEstimative of parameters:\n")
 	print(round(x$par,2))
+
+	if( !is.null(x$lambda) ){
+	  cat("\nBoxCox transformation: lambda =", round(x$lambda,2), "\n")
+	}
 
 	if(!is.null(x$lower)&&!is.null(x$upper)){
 		cat("\nForecasting points and prediction intervals\n")
@@ -580,24 +933,33 @@ print.thetaModel <- function(x,...){
 	print( round(mm, 4 ) )
 
 	#if(x$tests[1,1] < 0.02){cat("\nWarning: According with the Teraesvirta Neural Network test with 98% of confidence, the unseasoned time series is not linearity in mean. This model may not be adequate.\n")}
-	if(x$tests[2,1] < 0.03){cat("\nWarning: According with the Shapiro-Wilk test with 97% of confidence, the unseasoned residuals do not follow the Normal distribution. The prediction intervals may not be adequate.\n")}
+	if(is.null(x$num_bootstrap)){
+  	if(x$tests[2,1] < 0.03){
+  	  cat("\nWarning: According with the Shapiro-Wilk test with 97% of confidence,
+      the unseasoned residuals do not follow the Normal distribution.
+      The prediction intervals may not be adequate.
+      Consider using the bagged version of this model.\n")
+  	}
+	}
+
 }
 
+#' @export
 summary.thetaModel <- function(object,...){
 
 	out = list()
 
 	out$method = object$method
 
-	out$s = object$s
+	out$s_type =  object$s_type
 
-	if(object$s){
-		out$type =  object$type
-	}
+	out$s_test =  object$s_test
 
 	out$opt.method = object$opt.method
 
 	out$par = object$par
+
+	out$lambda = object$lambda
 
 	if(!is.null(object$lower)&&!is.null(object$upper)){
 		mm = cbind(object$mean,object$lower,object$upper)
@@ -629,23 +991,28 @@ summary.thetaModel <- function(object,...){
 
 	out$tests = object$tests
 
+	if( !is.null(object$num_bootstrap))
+	  out$num_bootstrap = object$num_bootstrap
+
 	return(structure(out,class="summ"))
 }
 
+#' @export
 print.summ <- function(x,...){
 	cat(paste("Forecast method:", x$method, "\n\n"))
 
-	#cat(paste("Seasonal test result:", x$s, "\n"))
-	if(x$s){
-		cat(paste("Seasonal decomposition type:", x$type, "\n\n"))
-	}else{
-		cat(paste("Seasonal decomposition: none \n\n"))
-	}
+  cat(paste("Seasonal decomposition type:", x$s_type, "\n\n"))
+
+  cat(paste("Seasonal test:", x$s_test, "\n\n"))
 
 	cat(paste("Optimisation method:", x$opt.method,"\n\n"))
 
 	cat("Estimative of parameters:\n")
 	print(round(x$par,2))
+
+	if( !is.null(x$lambda) ){
+	  cat("\nBoxCox transformation: lambda =", round(x$lambda,2), "\n")
+	}
 
 	cat("\nForecasting points and prediction intervals\n")
 	print(x$statistics)
@@ -654,9 +1021,17 @@ print.summ <- function(x,...){
 	print(x$informationCriterions)
 
 	#if(x$tests[1,1] < 0.02){cat("\nWarning: According with the Teraesvirta Neural Network test with 98% of confidence, the unseasoned time series is not linearity in mean. This model may not be adequate.\n")}
-	if(x$tests[2,1] < 0.03){cat("\nWarning: According with the Shapiro-Wilk test with 97% of confidence, the unseasoned residuals do not follow the Normal distribution. The prediction intervals may not be adequate.\n")}
+	if( is.null( x$num_bootstrap) ) {
+	  if(x$tests[2,1] < 0.03){
+	    cat("\nWarning: According with the Shapiro-Wilk test with 97% of confidence,
+      the unseasoned residuals do not follow the Normal distribution.
+      The prediction intervals may not be adequate.
+      Consider using the bagged version of this model.\n")
+	  }
+	}
 }
 
+#' @export
 plot.thetaModel <- function(x, ylim=NULL, xlim=NULL, ylab=NULL, xlab=NULL, main=NULL,...){
 	h = length(x$mean)
 	time_y = time(x$y)
@@ -686,3 +1061,5 @@ plot.thetaModel <- function(x, ylim=NULL, xlim=NULL, ylab=NULL, xlab=NULL, main=
 
 	points(x$mean, type = "l", col="blue", lwd=3)
 }
+
+
