@@ -19,22 +19,22 @@ Standard Theta Model (Fiorucci et al, 2016).
 bagged_dotm(y, h=5, level=c(80,90,95), num_bootstrap = 100, bs_bootstrap = NULL,
   s_type="multiplicative", s_test="default", lambda=NULL,
   par_ini=c(y[1]/2, 0.5, 2),	estimation=TRUE, lower=c(-1e+10, 0.1, 1.0),
-  upper=c(1e+10, 0.99, 1e+10), opt.method="Nelder-Mead", xreg=NULL)
+  upper=c(1e+10, 0.99, 1e+10), opt.method="Nelder-Mead")
 
 bagged_dstm(y, h=5, level=c(80,90,95), num_bootstrap = 100, bs_bootstrap = NULL,
   s_type="multiplicative", s_test="default", lambda=NULL, par_ini=c(y[1]/2, 0.5),
   estimation=TRUE, lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99),
-  opt.method="Nelder-Mead", xreg=NULL)
+  opt.method="Nelder-Mead")
 
 bagged_otm(y, h=5, level=c(80,90,95), num_bootstrap = 100, bs_bootstrap = NULL,
   s_type="multiplicative", s_test="default", lambda=NULL, par_ini=c(y[1]/2, 0.5, 2),
   estimation=TRUE, lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
-  opt.method="Nelder-Mead", xreg=NULL)
+  opt.method="Nelder-Mead")
 
 bagged_stm(y, h=5, level=c(80,90,95), num_bootstrap = 100, bs_bootstrap = NULL,
   s_type="multiplicative", s_test="default", lambda=NULL, par_ini=c(y[1]/2, 0.5),
   estimation=TRUE, lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99),
-  opt.method="Nelder-Mead", xreg=NULL)
+  opt.method="Nelder-Mead")
 }
 
 \arguments{
@@ -87,9 +87,7 @@ bagged_stm(y, h=5, level=c(80,90,95), num_bootstrap = 100, bs_bootstrap = NULL,
 		The numeric optimisation method for \code{optim()} function.
 		Choose one among \code{'Nelder-Mead', 'L-BFGS-B', 'SANN'}.
 	}
-	\item{xreg}{
-		A matrix with the regressor variables including the out-of-sample data.
-	}
+
 
 }
 \details{

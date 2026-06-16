@@ -114,6 +114,8 @@ twoTL <- function(y, h, level,
 
 	if(!is.null(xreg)){
 
+	  xreg = as.matrix(xreg)
+
 		if(nrow(xreg) != n+h)
 			stop("ERROR: xreg must be a matrix with nrow(xreg) == length(y)+h");
 
@@ -307,7 +309,7 @@ twoTL <- function(y, h, level,
 
 		if(!is.null(xreg)){
 			reg = par[-(1:3)]
-			y_reg  = as.numeric(xreg[-(1:n),] %*% reg)
+			y_reg  = as.numeric(xreg[-(1:n),,drop=F] %*% reg)
 			quantiles = quantiles + y_reg
 
 			matForec.sample = matForec.sample + y_reg;
@@ -485,7 +487,8 @@ bagged_twoTL <- function(y, h, level,
                         bs_bootstrap = NULL, # bootstrap block size
                         s_type, ## s_type = c("additive","multiplicative","stl")
                         s_test, ## s_test = c("default","unit_root",TRUE, FALSE)
-                        par_ini, estimation, lower, upper, opt.method, dynamic, xreg=NULL,
+                        par_ini, estimation, lower, upper, opt.method, dynamic,
+                        xreg=NULL, ## Disabled as it is not handled in bld.mbb.bootstrap()
                         lambda=NULL  ## parameter of Box-Cox transformation
                         )
 {
@@ -557,13 +560,13 @@ bagged_dotm <- function(y, h=5, level=c(80,90,95),
                  s_test="default",
                  lambda=NULL, par_ini=c(y[1]/2, 0.5, 2), estimation=TRUE,
                  lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
-                 opt.method="Nelder-Mead", xreg=NULL ){
+                 opt.method="Nelder-Mead" ){
 
   out =  bagged_twoTL( y=y, h=h, level=level,
                        num_bootstrap = num_bootstrap, bs_bootstrap = bs_bootstrap,
                        s_type=s_type, s_test=s_test, par_ini=par_ini,
                        estimation=estimation, lower=lower, upper=upper, opt.method=opt.method,
-                       dynamic=TRUE, xreg=xreg, lambda=lambda)
+                       dynamic=TRUE, xreg=NULL, lambda=lambda)
 
   out$method = "Dynamic Optimised Theta Model"
   if(out$num_bootstrap > 1){ out$method = paste("Bagged", out$method); }
@@ -577,13 +580,13 @@ bagged_dstm <- function(y, h=5, level=c(80,90,95),
                  s_type="multiplicative", s_test="default",
                  lambda=NULL, par_ini=c(y[1]/2, 0.5),estimation=TRUE,
                  lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99),
-                 opt.method="Nelder-Mead", xreg=NULL){
+                 opt.method="Nelder-Mead"){
 
   out =  bagged_twoTL( y=y, h=h, level=level,
                        num_bootstrap = num_bootstrap, bs_bootstrap = bs_bootstrap,
                        s_type=s_type, s_test=s_test, par_ini=c(par_ini,2.0),
                        estimation=estimation, lower=c(lower, 1.99999), upper=c(upper, 2.00001),
-                       opt.method=opt.method, dynamic=TRUE, xreg=xreg, lambda=lambda)
+                       opt.method=opt.method, dynamic=TRUE, xreg=NULL, lambda=lambda)
 
   out$method = "Dynamic Standard Theta Model"
   if(out$num_bootstrap > 1){ out$method = paste("Bagged", out$method); }
@@ -600,13 +603,13 @@ bagged_otm <- function(y, h=5, level=c(80,90,95),
                 s_type="multiplicative", s_test="default",
                 lambda=NULL, par_ini=c(y[1]/2, 0.5, 2.0), estimation=TRUE,
                 lower=c(-1e+10, 0.1, 1.0), upper=c(1e+10, 0.99, 1e+10),
-                opt.method="Nelder-Mead", xreg=NULL){
+                opt.method="Nelder-Mead"){
 
   out = bagged_twoTL( y=y, h=h, level=level,
                       num_bootstrap = num_bootstrap, bs_bootstrap = bs_bootstrap,
                       s_type=s_type, s_test=s_test,
                       par_ini=par_ini, estimation=estimation, lower=lower,
-                      upper=upper, opt.method=opt.method, dynamic=FALSE, xreg=xreg,
+                      upper=upper, opt.method=opt.method, dynamic=FALSE, xreg=NULL,
                       lambda=lambda)
 
   out$method = "Optimised Theta Model"
@@ -621,14 +624,14 @@ bagged_stm <- function(y, h=5, level=c(80,90,95),
                 s_type="multiplicative", s_test="default",
                 lambda=NULL, par_ini=c(y[1]/2, 0.5), estimation=TRUE,
                 lower=c(-1e+10, 0.1), upper=c(1e+10, 0.99),
-                opt.method="Nelder-Mead", xreg=NULL){
+                opt.method="Nelder-Mead"){
 
   out = bagged_twoTL( y=y, h=h, level=level,
                       num_bootstrap = num_bootstrap, bs_bootstrap = bs_bootstrap,
                       s_type=s_type, s_test=s_test,
                       par_ini=c(par_ini,2.0), estimation=estimation,
                       lower=c(lower,1.99999), upper=c(upper,2.00001),
-                      opt.method=opt.method, dynamic=FALSE, xreg=xreg, lambda=lambda)
+                      opt.method=opt.method, dynamic=FALSE, xreg=NULL, lambda=lambda)
 
   out$method = "Standard Theta Model"
   if(out$num_bootstrap > 1){ out$method = paste("Bagged", out$method); }
@@ -933,14 +936,11 @@ print.thetaModel <- function(x,...){
 	print( round(mm, 4 ) )
 
 	#if(x$tests[1,1] < 0.02){cat("\nWarning: According with the Teraesvirta Neural Network test with 98% of confidence, the unseasoned time series is not linearity in mean. This model may not be adequate.\n")}
-	if(is.null(x$num_bootstrap)){
-  	if(x$tests[2,1] < 0.03){
-  	  cat("\nWarning: According with the Shapiro-Wilk test with 97% of confidence,
-      the unseasoned residuals do not follow the Normal distribution.
-      The prediction intervals may not be adequate.
-      Consider using the bagged version of this model.\n")
-  	}
-	}
+# 	if(is.null(x$num_bootstrap)){
+#   	if(x$tests[2,1] < 0.03){
+#   	  cat("\nWarning: According to the Shapiro–Wilk test at the 97% confidence level, the deseasonalized residuals appear to deviate from normality. As a result, the prediction intervals may be less reliable. Consider using a bagged version of the model.\n")
+#   	}
+# 	}
 
 }
 
@@ -1021,14 +1021,11 @@ print.summ <- function(x,...){
 	print(x$informationCriterions)
 
 	#if(x$tests[1,1] < 0.02){cat("\nWarning: According with the Teraesvirta Neural Network test with 98% of confidence, the unseasoned time series is not linearity in mean. This model may not be adequate.\n")}
-	if( is.null( x$num_bootstrap) ) {
-	  if(x$tests[2,1] < 0.03){
-	    cat("\nWarning: According with the Shapiro-Wilk test with 97% of confidence,
-      the unseasoned residuals do not follow the Normal distribution.
-      The prediction intervals may not be adequate.
-      Consider using the bagged version of this model.\n")
-	  }
-	}
+	# if( is.null( x$num_bootstrap) ) {
+	#   if(x$tests[2,1] < 0.03){
+	#     cat("\nWarning: According to the Shapiro–Wilk test at the 97% confidence level, the deseasonalized residuals appear to deviate from normality. As a result, the prediction intervals may be less reliable. Consider using a bagged version of the model.\n")
+	#   }
+	# }
 }
 
 #' @export

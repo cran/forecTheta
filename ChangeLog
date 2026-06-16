@@ -1,3 +1,11 @@
+Version 3.0.3 (15 Jun 2026)
+  * Disabling the alert about residuals not be normal distribution.
+
+Version 3.0.2 (07 Oct 2025)
+  * Disabled xreg in bagged models as it is not handled in bld.mbb.bootstrap()
+
+Version 3.0.1 (12 Sep 2025)
+  * fixed an issue for univariate xreg
 
 Version 3.0 (20 may 2025)
   * included MSIS and ACD metrics for prediction interval evaluation

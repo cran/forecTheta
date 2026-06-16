@@ -1,7 +1,7 @@
 Package: forecTheta
 Type: Package
 Title: Forecasting Time Series by Theta Models
-Version: 3.0
+Version: 3.0.3
 Maintainer: Jose Augusto Fiorucci <jafiorucci@gmail.com>
 Description: Routines for forecasting univariate time series using Theta Models.
 License: GPL (>= 2)
@@ -13,7 +13,7 @@ RoxygenNote: 7.3.2
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2025-05-21 02:52:24 UTC; jafio
+Packaged: 2026-06-15 21:37:33 UTC; jafio
 Author: Jose Augusto Fiorucci [aut, cre, cph] (ORCID:
     <https://orcid.org/0000-0002-1201-9089>),
   Francisco Louzada [aut, cph] (ORCID:
@@ -21,4 +21,4 @@ Author: Jose Augusto Fiorucci [aut, cre, cph] (ORCID:
   Igor De Oliveira Barros Faluhelyi [aut, ctb] (ORCID:
     <https://orcid.org/0009-0008-1637-4476>)
 Repository: CRAN
-Date/Publication: 2025-05-21 03:20:02 UTC
+Date/Publication: 2026-06-16 05:10:30 UTC
